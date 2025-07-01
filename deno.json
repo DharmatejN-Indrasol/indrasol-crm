@@ -1,0 +1,16 @@
+{
+    "nodeModulesDir": "auto",
+    "compilerOptions": {
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],
+      "strict": true,
+      "noFallthroughCasesInSwitch": true,
+      "jsx": "react-jsx"
+    },
+    "unstable": [
+      "sloppy-imports"
+    ]
+} 

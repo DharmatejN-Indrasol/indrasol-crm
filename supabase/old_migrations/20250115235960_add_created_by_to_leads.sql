@@ -1,0 +1,2 @@
+ALTER TABLE "public"."leads" ADD COLUMN IF NOT EXISTS "created_by" uuid;
+ALTER TABLE "public"."leads" ADD CONSTRAINT "leads_created_by_fkey" FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL; 

@@ -1,0 +1,10 @@
+DROP VIEW IF EXISTS "public"."companies_summary" CASCADE;
+DROP VIEW IF EXISTS "public"."contacts_summary" CASCADE;
+DROP TABLE IF EXISTS "public"."tasks" CASCADE;
+DROP TABLE IF EXISTS "public"."tags" CASCADE;
+DROP TABLE IF EXISTS "public"."sales" CASCADE;
+DROP TABLE IF EXISTS "public"."deals" CASCADE;
+DROP TABLE IF EXISTS "public"."dealNotes" CASCADE;
+DROP TABLE IF EXISTS "public"."contacts" CASCADE;
+DROP TABLE IF EXISTS "public"."contactNotes" CASCADE;
+DROP TABLE IF EXISTS "public"."companies" CASCADE; 
