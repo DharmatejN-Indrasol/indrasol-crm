@@ -122,9 +122,6 @@ const dataProviderWithCustomMethods = {
             throw new Error('Failed to create account');
         }
 
-        // Update the is initialized cache
-        getIsInitialized._is_initialized_cache = true;
-
         return {
             id: response.data.user.id,
             email,

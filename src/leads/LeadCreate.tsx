@@ -10,13 +10,6 @@ const LeadCreate = () => {
     const { identity } = useGetIdentity();
     return (
         <CreateBase
-            redirect="show"
-            transform={(data: Contact) => ({
-                ...data,
-                first_seen: new Date().toISOString(),
-                last_seen: new Date().toISOString(),
-                tags: [],
-            })}
         >
             <Box mt={2} display="flex">
                 <Box flex="1">
@@ -26,7 +19,7 @@ const LeadCreate = () => {
                         { label: 'New Lead' }
                       ]}
                     />
-                    <Form defaultValues={{ sales_id: identity?.id }}>
+                    <Form>
                         <Card>
                             <CardContent>
                                 <LeadInputs />
