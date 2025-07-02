@@ -114,4 +114,18 @@ export function useLeadImport() {
         [dataProvider, user?.identity?.id, today]
     );
     return processBatch;
-} 
+}
+
+export const PREVIEW_FIELDS = [
+    'first_name', 'last_name', 'company_name', 'status',
+    'email_address', 'direct_phone_number', 'mobile_phone',
+    'email_work', 'email_home', 'email_other',
+    'phone_work', 'phone_home', 'phone_other',
+    'linkedin_contact_profile_url', 'linkedin_url',
+    'zoominfo_contact_profile_url', 'zoominfo_company_profile_url',
+    'facebook_company_profile_url', 'twitter_company_profile_url'
+];
+
+export const REQUIRED_FIELDS = [
+    'first_name', 'last_name', 'company_name'
+]; 

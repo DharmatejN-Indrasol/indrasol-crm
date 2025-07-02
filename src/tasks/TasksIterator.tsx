@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useListContext } from 'react-admin';
 import { isAfter } from 'date-fns';
-import { List, SxProps } from '@mui/material';
+import List from '@mui/material/List';
 import { VariableSizeList as VirtualList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Task } from './Task';

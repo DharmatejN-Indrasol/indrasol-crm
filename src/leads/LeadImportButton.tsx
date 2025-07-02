@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from 'react-admin';
 import UploadIcon from '@mui/icons-material/Upload';
-import { UnifiedImportDialog } from '../misc/UnifiedImportDialog';
+import LeadImportDialog from './LeadImportDialog';
 
 const LeadImportButton = ({ importBtnRef }: { importBtnRef?: React.RefObject<HTMLButtonElement | null> }) => {
     const [modalOpen, setModalOpen] = useState(false);
@@ -13,7 +13,7 @@ const LeadImportButton = ({ importBtnRef }: { importBtnRef?: React.RefObject<HTM
                 onClick={() => setModalOpen(true)}
                 ref={importBtnRef}
             />
-            <UnifiedImportDialog open={modalOpen} onClose={() => setModalOpen(false)} defaultResource="leads" />
+            <LeadImportDialog open={modalOpen} onClose={() => setModalOpen(false)} />
         </>
     );
 };

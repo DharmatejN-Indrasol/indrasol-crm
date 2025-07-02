@@ -1,4 +1,4 @@
-import { Button, Chip, DialogContent, Stack } from '@mui/material';
+import { Button, Chip, DialogContent, Stack, DialogActions } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
@@ -68,6 +68,9 @@ export const DealEdit = ({ open, id }: { open: boolean; id?: string }) => {
                             <DealInputs />
                         </DialogContent>
                         <EditToolbar />
+                        <DialogActions>
+                            <Button onClick={handleClose} color="primary">Cancel</Button>
+                        </DialogActions>
                     </Form>
                 </EditBase>
             ) : null}

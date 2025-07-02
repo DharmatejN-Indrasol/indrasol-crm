@@ -1,4 +1,4 @@
-import { Chip } from '@mui/material';
+import Chip from '@mui/material/Chip';
 import { useState } from 'react';
 import { Tag } from '../types';
 import { TagEditModal } from './TagEditModal';

@@ -14,18 +14,18 @@ function MyErrorFallback({ error }: { error: Error }) {
 }
 
 export const Layout = ({ children }: { children: ReactNode }) => {
-    const location = useLocation();
+    // const location = useLocation();
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            NProgress.start();
-        }, 150);
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         NProgress.start();
+    //     }, 150);
 
-        return () => {
-            clearTimeout(timer);
-            NProgress.done();
-        };
-    }, [location.pathname]);
+    //     return () => {
+    //         clearTimeout(timer);
+    //         NProgress.done();
+    //     };
+    // }, [location.pathname]);
 
     return (
         <>
@@ -34,7 +34,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <Container maxWidth={false} disableGutters sx={{ width: '100%', maxWidth: '100%', px: { xs: 1, sm: 2, md: 3, lg: 4 }, py:1 }}>
                 <main id="main-content">
                     <ErrorBoundary FallbackComponent={MyErrorFallback}>
-                        <Suspense fallback={<Loading />}>{children}</Suspense>
+                        {/* Only the top-level Suspense in CRM.tsx should show a global loading bar */}
+                        <Suspense fallback={null}>{children}</Suspense>
                     </ErrorBoundary>
                 </main>
             </Container>

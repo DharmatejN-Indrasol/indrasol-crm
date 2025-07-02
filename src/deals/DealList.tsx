@@ -14,7 +14,7 @@ import {
 } from 'react-admin';
 import { matchPath, useLocation, useMatch } from 'react-router';
 import { useEffect, useState, useRef } from 'react';
-import { Alert, Box, Card, Chip, IconButton, Stack, Typography } from '@mui/material';
+import { Alert, Box, Card, Chip, IconButton, Stack, Typography, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import { useConfigurationContext } from '../root/ConfigurationContext';
@@ -27,6 +27,7 @@ import { DealShow } from './DealShow';
 import { OnlyMineInput } from './OnlyMineInput';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { DealCard } from './DealCard';
+import { DealImportButton } from './DealImportButton';
 
 const ONBOARDING_DEALS_BANNER_KEY = 'crm_onboarding_deals_banner_dismissed';
 
@@ -75,7 +76,7 @@ const DealLayout = () => {
     // const { dealCategories } = useConfigurationContext();
     // const dealFilters = [ ... ];
     const [showBanner, setShowBanner] = useState(false);
-    const { data, isPending, filterValues } = useListContext();
+    const { data, isLoading, error, filterValues } = useListContext();
     const hasFilters = filterValues && Object.keys(filterValues).length > 0;
     const listRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -102,7 +103,8 @@ const DealLayout = () => {
         localStorage.setItem(ONBOARDING_DEALS_BANNER_KEY, '1');
         setShowBanner(false);
     };
-    if (isPending) return null;
+    if (isLoading) return <Stack alignItems="center" mt={4}><CircularProgress /></Stack>;
+    if (error) return <Alert severity="error">Failed to load deals. Please try again later.</Alert>;
     if (!data?.length && !hasFilters)
         return (
             <>
@@ -167,6 +169,9 @@ const DealActions = () => {
                 label="New Deal"
                 sx={{ marginLeft: 2 }}
             />
+            <Box sx={{ display: 'inline', marginLeft: 2 }}>
+                <DealImportButton />
+            </Box>
         </TopToolbar>
     );
 };

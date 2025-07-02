@@ -13,15 +13,13 @@ export const DealEmpty = ({ children }: { children?: React.ReactNode }) => {
     const matchCreate = matchPath('/deals/create', location.pathname);
     const appbarHeight = useAppBarHeight();
 
-    // get Contact data
-    const { data: contacts, isPending: contactsLoading } = useGetList<Contact>(
+    // get Contact data (no loading check)
+    const { data: contacts } = useGetList<Contact>(
         'contacts',
         {
             pagination: { page: 1, perPage: 1 },
         }
     );
-
-    if (contactsLoading) return <LinearProgress />;
 
     return (
         <Stack

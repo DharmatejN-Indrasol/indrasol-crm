@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, CardContent, Box } from '@mui/material';
+import { Card, CardContent, Box, Button as MuiButton } from '@mui/material';
 import { CreateBase, Form, Toolbar, useGetIdentity } from 'react-admin';
 import { LeadInputs } from './LeadInputs';
 import { Contact } from '../types';
@@ -31,7 +31,15 @@ const LeadCreate = () => {
                             <CardContent>
                                 <LeadInputs />
                             </CardContent>
-                            <Toolbar />
+                            <Toolbar>
+                                <MuiButton
+                                    onClick={() => window.history.back()}
+                                    color="primary"
+                                    sx={{ mr: 2 }}
+                                >
+                                    Cancel
+                                </MuiButton>
+                            </Toolbar>
                         </Card>
                     </Form>
                 </Box>

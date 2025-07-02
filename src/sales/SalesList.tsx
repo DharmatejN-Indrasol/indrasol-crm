@@ -1,5 +1,7 @@
-import { Alert, Chip, IconButton, Stack } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 import React, { useEffect, useState } from 'react';
 import { SalesImportButton } from './SalesImportButton';
 import {

@@ -1,4 +1,4 @@
-import { LinearProgress } from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import type { AdminProps, AuthProvider, DataProvider } from 'react-admin';
 import {
@@ -145,7 +145,7 @@ export const CRM = ({
     }, [disableTelemetry]);
 
     const [loading, setLoading] = useState(false);
-    // Show progress bar on suspense fallback
+    // Show progress bar only for top-level app loading
     const SuspenseWithProgress = ({ children }: { children: React.ReactNode }) => (
         <Suspense fallback={<LinearProgress sx={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 2000 }} />}>
             {children}

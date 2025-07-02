@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-import { Alert, Box, Button, Card, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, Chip, IconButton, Stack, Tooltip, Typography, CircularProgress } from '@mui/material';
 import jsonExport from 'jsonexport/dist';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CloseIcon from '@mui/icons-material/Close';
@@ -86,7 +86,7 @@ export const ContactList = () => {
     return (
         <ListBase
             perPage={25}
-            sort={{ field: 'last_seen', order: 'DESC' }}
+            sort={{ field: 'created_at', order: 'DESC' }}
             exporter={exporter}
             filters={<ContactListFilter />}
         >
@@ -103,6 +103,8 @@ const ContactListLayout = () => {
     const importBtnRef = useRef<HTMLButtonElement>(null);
     const hasFilters = filterValues && Object.keys(filterValues).length > 0;
     const [view, setView] = useState<'table' | 'kanban'>('table');
+    const { isLoading, error } = useListContext();
+
     useEffect(() => {
         if (data && data.length === 0 && !localStorage.getItem(ONBOARDING_CONTACTS_BANNER_KEY)) {
             setShowBanner(true);
@@ -124,7 +126,12 @@ const ContactListLayout = () => {
         localStorage.setItem(GUIDED_TOUR_CONTACTS_IMPORT_KEY, '1');
         setShowTooltip(false);
     };
-    if (!identity || isPending) return null;
+    if (isLoading) {
+        return <Stack alignItems="center" mt={4}><CircularProgress /></Stack>;
+    }
+    if (error) {
+        return <Alert severity="error">Failed to load contacts. Please try again later.</Alert>;
+    }
     if (!data?.length && !hasFilters)
         return (
             <>

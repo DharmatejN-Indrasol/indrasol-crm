@@ -18,7 +18,7 @@ import { CompanyEmpty } from './CompanyEmpty';
 import { CompanyImportButton } from './CompanyImportButton';
 import { getPredictiveScore, PredictiveScoreChip } from '../misc/predictiveScore';
 import { useEffect, useState } from 'react';
-import { Alert, IconButton } from '@mui/material';
+import { Alert, IconButton, CircularProgress } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
@@ -55,7 +55,7 @@ export const CompanyList = () => {
 
 const CompanyListLayout = () => {
     const [showBanner, setShowBanner] = useState(false);
-    const { data, isPending, filterValues } = useListContext();
+    const { data, isPending, filterValues, isLoading, error } = useListContext();
     const hasFilters = filterValues && Object.keys(filterValues).length > 0;
     useEffect(() => {
         if (data && data.length === 0 && !localStorage.getItem(ONBOARDING_COMPANIES_BANNER_KEY)) {
@@ -66,7 +66,12 @@ const CompanyListLayout = () => {
         localStorage.setItem(ONBOARDING_COMPANIES_BANNER_KEY, '1');
         setShowBanner(false);
     };
-    if (isPending) return null;
+    if (isLoading) {
+        return <Stack alignItems="center" mt={4}><CircularProgress /></Stack>;
+    }
+    if (error) {
+        return <Alert severity="error">Failed to load companies. Please try again later.</Alert>;
+    }
     if (!data?.length && !hasFilters)
         return (
             <>

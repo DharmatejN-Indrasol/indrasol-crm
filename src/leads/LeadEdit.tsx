@@ -56,6 +56,13 @@ const LeadEditContent = () => {
                         </CardContent>
                         <Toolbar>
                             <SaveButton />
+                            <MuiButton
+                                onClick={() => window.history.back()}
+                                color="primary"
+                                sx={{ ml: 2 }}
+                            >
+                                Cancel
+                            </MuiButton>
                         </Toolbar>
                     </Card>
                 </Form>
