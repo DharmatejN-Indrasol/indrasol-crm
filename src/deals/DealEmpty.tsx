@@ -28,7 +28,6 @@ export const DealEmpty = ({ children }: { children?: React.ReactNode }) => {
             gap={4}
             sx={{ height: `calc(100dvh - ${appbarHeight}px)` }}
         >
-            <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1, mb: 2 }} />
             <img src="./img/empty.svg" alt="No deals found" />
             {contacts && contacts.length > 0 ? (
                 <>

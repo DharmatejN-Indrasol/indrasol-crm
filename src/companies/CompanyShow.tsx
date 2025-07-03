@@ -71,24 +71,12 @@ const CompanyShowContent = () => {
                 <Card sx={{ boxShadow: 2, borderRadius: 3, p: 2, '&:hover': { boxShadow: 4 }, transition: 'box-shadow 0.2s' }}>
                     <CardContent sx={{ p: 0 }}>
                         <Stack gap={2}>
-                            {/* AI Insights Banner */}
-                            <Alert icon={<SmartToyIcon fontSize="inherit" />} severity="info" sx={{ fontWeight: 600, fontSize: '1.1rem', background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#330867', mb: 1 }}>
-                                {aiInsight}
-                            </Alert>
-                            {/* AI Suggestion Chip */}
-                            <Chip icon={<SmartToyIcon fontSize="small" />} label={aiSuggestion} color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1, mb: 1 }} />
-                            {/* AI Summary */}
-                            <Alert icon={<SmartToyIcon fontSize="inherit" />} severity="success" sx={{ fontWeight: 600, fontSize: '1.05rem', background: 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)', color: '#330867', mb: 1 }}>
-                                {aiSummary}
-                            </Alert>
                             <Box display="flex" alignItems="center" gap={2} mb={1}>
                                 <Avatar />
                                 <Stack direction="row" alignItems="center" gap={1} flex={1}>
                                     <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 0.2, color: 'text.primary' }}>
                                         {record.name}
                                     </Typography>
-                                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
-                                    <PredictiveScoreChip score={getPredictiveScore(record)} />
                                 </Stack>
                                 <Button variant="outlined" sx={{ ml: 2 }} onClick={() => setEmailModalOpen(true)}>
                                     Generate Cold Email
@@ -161,7 +149,6 @@ const CompanyShowContent = () => {
                     </CardContent>
                 </Card>
                 <Stack direction="row" alignItems="center" gap={1} mt={2} mb={1}>
-                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
                     <span style={{ fontWeight: 600, color: '#2563eb', fontSize: '1.1rem' }}>Smart Reminders</span>
                 </Stack>
                 <Suspense fallback={null}>

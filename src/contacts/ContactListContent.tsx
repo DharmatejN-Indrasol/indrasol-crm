@@ -32,7 +32,6 @@ import { Status } from '../misc/Status';
 import { Contact } from '../types';
 import { Avatar } from './Avatar';
 import { TagsList } from './TagsList';
-import { AIChip } from '../misc/AIChip';
 
 const DEFAULT_ROW_HEIGHT = 80;
 
@@ -68,7 +67,6 @@ export const ContactListContent = () => {
         return (
             <List>
                 <ListItem sx={{ flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1, mb: 2 }} />
                     <ListItemText primary={<Typography variant="h6" fontWeight={700}>No contacts found</Typography>} secondary={<Typography variant="body2" color="text.secondary">It seems your contact list is empty. Use the AI-powered import or create a new contact.</Typography>} />
                 </ListItem>
             </List>
@@ -126,8 +124,6 @@ export const ContactListContent = () => {
                             <ListItemText
                                 primary={<>
                                     {`${contact.first_name} ${contact.last_name ?? ''}`}
-                                    {isHot && <AIChip label="AI: Hot" color="error" explanation="AI predicts this contact is highly engaged." onFeedback={() => {}} sx={{ ml: 1 }} />}
-                                    {isAtRisk && <AIChip label="AI: At risk" color="warning" explanation="AI predicts this contact may churn soon." onFeedback={() => {}} sx={{ ml: 1 }} />}
                                 </>}
                                 secondary={
                                     <>

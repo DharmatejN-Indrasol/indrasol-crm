@@ -37,7 +37,6 @@ import { Deal } from '../types';
 import { ContactList } from './ContactList';
 import { findDealLabel } from './deal';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { AIChip } from '../misc/AIChip';
 import { getAINextAction, AINextActionResult } from '../misc/aiService';
 
 export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
@@ -111,13 +110,6 @@ const DealShowContent = ({ handleClose }: { handleClose: () => void }) => {
             />
             <Stack gap={1}>
                 {record.archived_at ? <ArchivedTitle /> : null}
-                {/* AI Health/Status Chips */}
-                <Stack direction="row" alignItems="center" gap={1} p={2}>
-                    {ai.status && !ai.error && <AIChip label={ai.status} color={ai.status.includes('High') ? 'success' : 'warning'} explanation="AI analyzes deal history and predicts likelihood to close." onFeedback={handleFeedback} loading={aiLoading} />}
-                    {ai.nextAction && !ai.error && <AIChip label={ai.nextAction} color="primary" explanation="AI suggests the next best action based on recent activity." onFeedback={handleFeedback} loading={aiLoading} />}
-                    {ai.forecast && !ai.error && <AIChip label={ai.forecast} color="info" explanation="AI forecasts expected revenue based on pipeline trends." onFeedback={handleFeedback} loading={aiLoading} />}
-                    {(aiError || ai.error) && <AIChip label={String(aiError || ai.error || 'AI error')} color="warning" explanation="AI service is currently unavailable." />}
-                </Stack>
                 <Box display="flex" p={2}>
                     <Box flex="1">
                         <Stack
