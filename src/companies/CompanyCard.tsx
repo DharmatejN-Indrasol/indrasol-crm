@@ -19,7 +19,6 @@ import { CompanyAvatar } from './CompanyAvatar';
 import { Company } from '../types';
 import { useConfigurationContext } from '../root/ConfigurationContext';
 import { Avatar } from '../contacts/Avatar';
-import { AIChip } from '../misc/AIChip';
 
 export const CompanyCard = (props: { record?: Company }) => {
     const { companySectors } = useConfigurationContext();
@@ -89,14 +88,6 @@ export const CompanyCard = (props: { record?: Company }) => {
                     />
                 </Stack>
             </Box>
-            {/* Divider */}
-            <Divider sx={{ my: 0, mx: 2 }} />
-            {/* AI chips row */}
-            <Stack direction="row" alignItems="center" gap={1} justifyContent="center" mt={1} mb={1}>
-                <AIChip label="AI" color="primary" explanation="AI-powered company insights." sx={{ minHeight: 24 }} />
-                {isHot && <AIChip label="AI: Hot" color="error" explanation="AI predicts this company is highly engaged." onFeedback={() => {}} sx={{ fontWeight: 700 }} />}
-                {isAtRisk && <AIChip label="AI: At risk" color="warning" explanation="AI predicts this company may churn soon." onFeedback={() => {}} sx={{ fontWeight: 700 }} />}
-            </Stack>
             {/* Divider */}
             <Divider sx={{ my: 0, mx: 2 }} />
             {/* Stats row */}

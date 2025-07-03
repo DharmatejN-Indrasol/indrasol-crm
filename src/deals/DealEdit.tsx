@@ -18,7 +18,6 @@ import { DialogCloseButton } from '../misc/DialogCloseButton';
 import { Deal } from '../types';
 import { DealInputs } from './DealInputs';
 import { CompanyAvatar } from '../companies/CompanyAvatar';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 export const DealEdit = ({ open, id }: { open: boolean; id?: string }) => {
     const redirect = useRedirect();
@@ -106,7 +105,6 @@ function EditHeader() {
                     </ReferenceField>
                     <Stack direction="row" alignItems="center" gap={1}>
                         <Typography variant="h6">Edit {deal.name} deal</Typography>
-                        <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
                     </Stack>
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ pr: 3 }}>

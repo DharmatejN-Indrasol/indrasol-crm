@@ -5,7 +5,6 @@ import SnoozeIcon from '@mui/icons-material/Snooze';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNotify } from 'react-admin';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 
 export function getSmartReminders(record: any): string[] {
@@ -47,7 +46,6 @@ export function SmartRemindersList({ reminders }: { reminders: string[] }) {
   return (
     <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 1, boxShadow: 1 }}>
       <Stack direction="row" alignItems="center" gap={0.5} p={1}>
-        <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" aria-label="AI feature" sx={{ fontWeight: 700, letterSpacing: 1, '&:focus-visible': { outline: '2px solid #2563eb', outlineOffset: 2 } }} />
         <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563eb' }}>Smart Reminders</Typography>
       </Stack>
       <List dense={false}>

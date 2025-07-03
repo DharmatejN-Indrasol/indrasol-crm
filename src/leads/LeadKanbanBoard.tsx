@@ -12,6 +12,7 @@ import InboxIcon from '@mui/icons-material/Inbox';
 import TuneIcon from '@mui/icons-material/Tune';
 import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as DnDDraggable } from '@hello-pangea/dnd';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { AssignmentInd, CheckCircle, HourglassEmpty, ThumbDown, ThumbUp } from '@mui/icons-material';
 
 const LEAD_STATUSES = [
     'New',
@@ -36,6 +37,14 @@ const SORT_OPTIONS = [
 ];
 
 const STORAGE_KEY = 'lead_kanban_settings';
+
+const STATUS_ICONS: Record<string, JSX.Element> = {
+    'New': <HourglassEmpty fontSize="small" />,
+    'Contacted': <AssignmentInd fontSize="small" />,
+    'Qualified': <ThumbUp fontSize="small" />,
+    'Disqualified': <ThumbDown fontSize="small" />,
+    'Converted': <CheckCircle fontSize="small" />,
+};
 
 export default function LeadKanbanBoard({ leads, refetch, loading }: { leads: any[]; refetch: () => void; loading?: boolean }) {
     const dataProvider = useDataProvider();
@@ -292,99 +301,72 @@ export default function LeadKanbanBoard({ leads, refetch, loading }: { leads: an
                 </DialogActions>
             </Dialog>
             <DragDropContext onDragEnd={onDragEnd}>
-                <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ overflowX: 'auto', maxWidth: '100%', pb: 2 }}>
-                    {LEAD_STATUSES.filter(status => visibleColumns.includes(status)).map((status) => (
-                        <Droppable droppableId={status} key={status}>
-                            {(provided, snapshot) => (
-                                <Paper
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    sx={{ minWidth: 200, maxWidth: 250, width: '100%', background: STATUS_COLORS[status], p: 1, borderTop: `6px solid ${STATUS_COLORS[status]}` }}
-                                    elevation={3}
-                                >
-                                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                                        <Typography variant="h6">{status}</Typography>
-                                        <Chip label={grouped[status].length} size="small" color="primary" />
-                                    </Stack>
-                                    <FormControl size="small" sx={{ mb: 1, width: '100%' }}>
-                                        <InputLabel>Sort by</InputLabel>
-                                        <Select
-                                            value={columnSort[status] || 'created_at'}
-                                            label="Sort by"
-                                            onChange={e => setColumnSort(cs => ({ ...cs, [status]: e.target.value }))}
-                                        >
-                                            {SORT_OPTIONS.map(opt => (
-                                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    {loading ? (
-                                        skeletonCards.map((_, idx) => (
-                                            <Card key={idx} variant="outlined" sx={{ mb: 1, width: '100%', maxWidth: 400, boxSizing: 'border-box' }}>
-                                                <CardContent>
-                                                    <Stack direction="row" alignItems="center" spacing={1}>
-                                                        <Skeleton variant="circular" width={32} height={32} />
-                                                        <Box flex={1}>
-                                                            <Skeleton width="60%" />
-                                                            <Skeleton width="40%" />
-                                                            <Skeleton width="30%" />
-                                                        </Box>
-                                                    </Stack>
-                                                </CardContent>
-                                            </Card>
-                                        ))
-                                    ) : grouped[status].length === 0 ? (
-                                        <Stack alignItems="center" sx={{ my: 4 }}>
-                                            <InboxIcon color="disabled" sx={{ fontSize: 48, mb: 1 }} />
-                                            <Typography variant="body2" color="text.secondary" align="center">
-                                                No leads in this stage
-                                            </Typography>
-                                        </Stack>
-                                    ) : grouped[status].map((lead, idx) => (
-                                        <Draggable draggableId={lead.id.toString()} index={idx} key={lead.id}>
-                                            {(provided, snapshot) => (
-                                                <Box
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    sx={{ mb: 1, cursor: 'pointer', opacity: snapshot.isDragging ? 0.7 : 1, width: '100%', maxWidth: 400, boxSizing: 'border-box' }}
-                                                >
-                                                    <Card variant="outlined" sx={{ position: 'relative', width: '100%', maxWidth: 400, boxSizing: 'border-box' }}>
-                                                        <CardContent sx={{ pb: '56px' }}>
+                <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', minHeight: 400, p: 2, bgcolor: '#f5f7fa' }}>
+                    {visibleColumns.map(status => (
+                        <Paper key={status} elevation={4} sx={{ minWidth: 320, maxWidth: 360, flex: '1 1 320px', bgcolor: STATUS_COLORS[status], borderRadius: 3, display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.2s', position: 'relative', m: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '2px solid #e0e0e0', bgcolor: STATUS_COLORS[status], borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                                {STATUS_ICONS[status]}
+                                <Typography variant="h6" sx={{ ml: 1, fontWeight: 700, color: '#333' }}>{status}</Typography>
+                                <Chip label={grouped[status]?.length || 0} size="small" sx={{ ml: 2, bgcolor: '#fff', color: '#1976d2', fontWeight: 700 }} />
+                            </Box>
+                            <Droppable droppableId={status}>
+                                {(provided, snapshot) => (
+                                    <Box ref={provided.innerRef} {...provided.droppableProps} sx={{ flex: 1, minHeight: 200, p: 1, transition: 'background 0.2s', bgcolor: snapshot.isDraggingOver ? '#bbdefb' : 'transparent', borderRadius: 2 }}>
+                                        {grouped[status].length === 0 && (
+                                            <Box sx={{ textAlign: 'center', color: '#aaa', mt: 4 }}>
+                                                <InboxIcon sx={{ fontSize: 48, mb: 1 }} />
+                                                <Typography variant="body2">No leads in this stage</Typography>
+                                            </Box>
+                                        )}
+                                        {grouped[status].map((lead, idx) => (
+                                            <Draggable key={lead.id} draggableId={lead.id.toString()} index={idx}>
+                                                {(provided, snapshot) => (
+                                                    <Card ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}
+                                                        sx={{
+                                                            mb: 2,
+                                                            borderRadius: 3,
+                                                            boxShadow: snapshot.isDragging ? 8 : 2,
+                                                            transform: snapshot.isDragging ? 'scale(1.03)' : 'none',
+                                                            transition: 'box-shadow 0.2s, transform 0.2s',
+                                                            position: 'relative',
+                                                            ':hover .kanban-actions': { opacity: 1, pointerEvents: 'auto' },
+                                                            bgcolor: '#fff',
+                                                            minHeight: 120,
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            justifyContent: 'space-between',
+                                                        }}
+                                                        aria-label={`Lead card for ${lead.name || lead.first_name || ''}`}
+                                                    >
+                                                        <CardContent sx={{ pb: 1 }}>
                                                             <Stack direction="row" alignItems="center" spacing={1}>
-                                                                <Checkbox
-                                                                    checked={selected.has(lead.id.toString())}
-                                                                    onChange={() => toggleSelect(lead.id.toString())}
-                                                                    size="small"
-                                                                    sx={{ mr: 1 }}
-                                                                />
-                                                                <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
-                                                                    {lead.owner_id ? lead.owner_id.toString().slice(-2) : '?'}
-                                                                </Avatar>
-                                                                <Box flex={1} onClick={() => redirect(`/leads/${lead.id}/show`)}>
-                                                                    <Typography variant="subtitle1">{lead.first_name || lead.name} {lead.last_name}</Typography>
-                                                                    <Typography variant="body2" color="text.secondary">{lead.email_address || lead.email}</Typography>
-                                                                    <Typography variant="body2">{lead.company_name}</Typography>
-                                                                    {lead.tags && lead.tags.split(',').map((tag: string) => (
-                                                                        <Chip key={tag} label={tag} size="small" sx={{ mr: 0.5, mt: 0.5 }} />
-                                                                    ))}
+                                                                <Avatar src={lead.avatar_url} alt={lead.name} sx={{ width: 40, height: 40, mr: 1 }} />
+                                                                <Box>
+                                                                    <Typography variant="subtitle1" fontWeight={700}>{lead.name || (lead.first_name + ' ' + lead.last_name)}</Typography>
+                                                                    <Typography variant="body2" color="text.secondary">{lead.email}</Typography>
+                                                                    <Typography variant="body2" color="text.secondary">{lead.phone}</Typography>
                                                                 </Box>
                                                             </Stack>
-                                                            <Stack direction="row" spacing={1} sx={{ position: 'absolute', bottom: 8, right: 8 }}>
-                                                                <Tooltip title="Add Note"><IconButton size="small" onClick={() => handleAddNote(lead)}><NoteAddIcon fontSize="small" /></IconButton></Tooltip>
-                                                                <Tooltip title="Assign Owner"><IconButton size="small" onClick={() => handleAssignOwner(lead)}><PersonAddIcon fontSize="small" /></IconButton></Tooltip>
-                                                                <Tooltip title="Convert"><IconButton size="small" onClick={() => handleConvert(lead)}><SwapHorizIcon fontSize="small" /></IconButton></Tooltip>
+                                                            <Stack direction="row" spacing={1} mt={1}>
+                                                                {lead.company_name && <Chip label={lead.company_name} size="small" />}
+                                                                {lead.tags && lead.tags.split(',').map((tag: string) => <Chip key={tag} label={tag} size="small" color="secondary" />)}
                                                             </Stack>
                                                         </CardContent>
+                                                        <Box className="kanban-actions" sx={{ position: 'absolute', top: 8, right: 8, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.2s', display: 'flex', gap: 1 }}>
+                                                            <Tooltip title="Add Note"><IconButton size="small" onClick={() => handleAddNote(lead)}><NoteAddIcon /></IconButton></Tooltip>
+                                                            <Tooltip title="Assign Owner"><IconButton size="small" onClick={() => handleAssignOwner(lead)}><PersonAddIcon /></IconButton></Tooltip>
+                                                            <Tooltip title="Convert"><IconButton size="small" onClick={() => handleConvert(lead)}><SwapHorizIcon /></IconButton></Tooltip>
+                                                            <Tooltip title="Delete"><IconButton size="small" color="error" onClick={() => handleBulkAction()}><DeleteIcon /></IconButton></Tooltip>
+                                                        </Box>
                                                     </Card>
-                                                </Box>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </Paper>
-                            )}
-                        </Droppable>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </Box>
+                                )}
+                            </Droppable>
+                        </Paper>
                     ))}
                 </Stack>
             </DragDropContext>

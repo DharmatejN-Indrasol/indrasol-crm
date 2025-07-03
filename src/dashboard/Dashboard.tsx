@@ -52,7 +52,6 @@ const KPIWidget = ({ totalDeal, totalContact, totalContactNotes }: { totalDeal: 
                 <Card sx={{ p: 3, borderRadius: 3, boxShadow: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)' }}>
                     <Typography variant="subtitle2" color="text.secondary">Total Deals</Typography>
                     <AnimatedCounter value={totalDeal} />
-                    <Chip label={mockTrends.deals.text} color="success" size="small" sx={{ mt: 1, fontWeight: 600 }} icon={<span>🤖</span>} />
                     <Box mt={1}>
                         <button style={{ border: 'none', background: '#fff', color: '#43e97b', borderRadius: 8, padding: '4px 12px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 4px #0001' }}>Ask AI</button>
                     </Box>
@@ -64,7 +63,6 @@ const KPIWidget = ({ totalDeal, totalContact, totalContactNotes }: { totalDeal: 
                 <Card sx={{ p: 3, borderRadius: 3, boxShadow: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, background: 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)' }}>
                     <Typography variant="subtitle2" color="text.secondary">Total Contacts</Typography>
                     <AnimatedCounter value={totalContact} />
-                    <Chip label={mockTrends.contacts.text} color="warning" size="small" sx={{ mt: 1, fontWeight: 600 }} icon={<span>🤖</span>} />
                     <Box mt={1}>
                         <button style={{ border: 'none', background: '#fff', color: '#fa709a', borderRadius: 8, padding: '4px 12px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 4px #0001' }}>Ask AI</button>
                     </Box>
@@ -76,7 +74,6 @@ const KPIWidget = ({ totalDeal, totalContact, totalContactNotes }: { totalDeal: 
                 <Card sx={{ p: 3, borderRadius: 3, boxShadow: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, background: 'linear-gradient(90deg, #30cfd0 0%, #330867 100%)', color: '#fff' }}>
                     <Typography variant="subtitle2" color="#fff">Total Notes</Typography>
                     <AnimatedCounter value={totalContactNotes} />
-                    <Chip label={mockTrends.notes.text} color="info" size="small" sx={{ mt: 1, fontWeight: 600, color: '#fff', background: '#330867' }} icon={<span>🤖</span>} />
                     <Box mt={1}>
                         <button style={{ border: 'none', background: '#fff', color: '#330867', borderRadius: 8, padding: '4px 12px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 4px #0001' }}>Ask AI</button>
                     </Box>
@@ -90,7 +87,7 @@ const KPIWidget = ({ totalDeal, totalContact, totalContactNotes }: { totalDeal: 
 const HotContactsAISuggestion = () => (
     <Card sx={{ mb: 2, p: 2, background: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)', borderRadius: 2, boxShadow: 2 }}>
         <Typography variant="body1" fontWeight={600} color="#330867">
-            <span role="img" aria-label="AI">🤖</span> AI recommends contacting <b>Jane Doe</b> today!
+            AI recommends contacting <b>Jane Doe</b> today!
         </Typography>
         <Box mt={1}>
             <button style={{ border: 'none', background: '#330867', color: '#fff', borderRadius: 8, padding: '4px 12px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 4px #0001' }}>
@@ -104,7 +101,7 @@ const HotContactsAISuggestion = () => (
 const DealsChartAISummary = () => (
     <Card sx={{ mt: 2, p: 2, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', borderRadius: 2, boxShadow: 2 }}>
         <Typography variant="body2" fontWeight={600} color="#330867">
-            <span role="img" aria-label="AI">🤖</span> AI: Revenue is trending up, expect <b>$12,000</b> next month!
+            AI: Revenue is trending up, expect <b>$12,000</b> next month!
         </Typography>
     </Card>
 );
@@ -197,7 +194,7 @@ const AIInsightsCard = () => (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <Card sx={{ p: 3, borderRadius: 3, boxShadow: 4, mb: 2, background: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)' }}>
             <Typography variant="h6" fontWeight={700} mb={1}>
-                <span role="img" aria-label="AI">🤖</span> AI Insights
+                AI Insights
             </Typography>
             <Typography variant="body1">
                 AI predicts you are on track to close <b>3 more deals</b> this month!<br/>
