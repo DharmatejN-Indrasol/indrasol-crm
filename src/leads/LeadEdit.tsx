@@ -32,11 +32,11 @@ const LeadEditContent = () => {
         <Box mt={2} display="flex">
             <Box flex="1">
                 <Breadcrumbs
-                  items={[
-                    { label: 'Leads', href: '/leads', icon: <PeopleIcon fontSize="small" /> },
-                    { label: record.first_name ? `${record.first_name} ${record.last_name || ''}`.trim() : 'Lead', href: `/leads/${record.id}/show` },
-                    { label: 'Edit' }
-                  ]}
+                    items={[
+                        { label: 'Leads', href: '/leads', icon: <PeopleIcon fontSize="small" /> },
+                        { label: record.first_name ? `${record.first_name} ${record.last_name || ''}`.trim() : 'Lead', href: `/leads/${record.id}/show` },
+                        { label: 'Edit' }
+                    ]}
                 />
                 <Form>
                     <Card>

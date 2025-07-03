@@ -1,38 +1,34 @@
 import * as React from 'react';
-import { Card, CardContent, Box, Button as MuiButton } from '@mui/material';
-import { CreateBase, Form, Toolbar, useGetIdentity } from 'react-admin';
+import { Card, CardContent, Box } from '@mui/material';
+import { CreateBase, Form, Toolbar } from 'react-admin';
 import { LeadInputs } from './LeadInputs';
-import { Contact } from '../types';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import PeopleIcon from '@mui/icons-material/People';
 
 const LeadCreate = () => {
-    const { identity } = useGetIdentity();
+    const [formKey, setFormKey] = React.useState(0);
+
     return (
         <CreateBase
+            redirect={false}
+            mutationOptions={{
+                onSuccess: () => setFormKey(k => k + 1)
+            }}
         >
             <Box mt={2} display="flex">
                 <Box flex="1">
                     <Breadcrumbs
-                      items={[
-                        { label: 'Leads', href: '/leads', icon: <PeopleIcon fontSize="small" /> },
-                        { label: 'New Lead' }
-                      ]}
+                        items={[
+                            { label: 'Leads', href: '/leads', icon: <PeopleIcon fontSize="small" /> },
+                            { label: 'New Lead' }
+                        ]}
                     />
-                    <Form>
+                    <Form key={formKey}>
                         <Card>
                             <CardContent>
                                 <LeadInputs />
                             </CardContent>
-                            <Toolbar>
-                                <MuiButton
-                                    onClick={() => window.history.back()}
-                                    color="primary"
-                                    sx={{ mr: 2 }}
-                                >
-                                    Cancel
-                                </MuiButton>
-                            </Toolbar>
+                            <Toolbar />
                         </Card>
                     </Form>
                 </Box>
