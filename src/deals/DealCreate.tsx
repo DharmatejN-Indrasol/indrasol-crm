@@ -14,7 +14,6 @@ import {
 import { DialogCloseButton } from '../misc/DialogCloseButton';
 import { Deal } from '../types';
 import { DealInputs } from './DealInputs';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { Chip } from '@mui/material';
 
 export const DealCreate = ({ open }: { open: boolean }) => {
@@ -90,7 +89,6 @@ export const DealCreate = ({ open }: { open: boolean }) => {
                         gap: 1,
                     }}
                 >
-                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
                     Create a new deal
                 </DialogTitle>
                 <Form

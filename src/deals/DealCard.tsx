@@ -4,7 +4,6 @@ import { ReferenceField, useRedirect } from 'react-admin';
 import { CompanyAvatar } from '../companies/CompanyAvatar';
 import { Deal } from '../types';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { AIChip } from '../misc/AIChip';
 import { getAINextAction, AINextActionResult } from '../misc/aiService';
 import { useState, useEffect } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
@@ -108,12 +107,6 @@ export const DealCardContent = ({
                     {deal.name}
                 </Typography>
             </Box>
-            {/* AI chips row */}
-            <Stack direction="row" alignItems="center" gap={1} justifyContent="center" mt={1} mb={1}>
-                <AIChip label="AI" color="primary" explanation="AI-powered deal insights." />
-                {ai.status && !ai.error && <AIChip label={ai.status} color={ai.status === 'AI: Hot' ? 'success' : 'warning'} explanation="AI analyzes deal activity and predicts status." onFeedback={handleFeedback} loading={aiLoading} />}
-                {aiError && <AIChip label={String(aiError)} color="warning" explanation="AI service is currently unavailable." />}
-            </Stack>
             <Divider sx={{ my: 0, mx: 2 }} />
             {/* Amount, category, quick actions */}
             <Box display="flex" alignItems="center" justifyContent="space-between" px={2} py={1.5}>

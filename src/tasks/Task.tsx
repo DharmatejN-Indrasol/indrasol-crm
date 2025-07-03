@@ -21,7 +21,6 @@ import {
     useUpdate,
 } from 'react-admin';
 import { TaskEdit } from './TaskEdit';
-import { AIChip } from '../misc/AIChip';
 
 export const Task = ({
     task,

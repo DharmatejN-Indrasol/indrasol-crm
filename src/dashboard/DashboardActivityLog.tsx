@@ -4,7 +4,6 @@ import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import { ActivityLog } from '../activity/ActivityLog';
 import Stack from '@mui/material/Stack';
-import Chip from '@mui/material/Chip';
 
 export function DashboardActivityLog() {
     return (
@@ -18,7 +17,6 @@ export function DashboardActivityLog() {
                         Latest Activity
                     </Typography>
                 </Box>
-                <Chip label="AI: You closed 2 deals and added 5 notes this week!" color="info" icon={<span>🤖</span>} sx={{ mb: 2, fontWeight: 600 }} />
                 <Box maxHeight={520} overflow="auto">
                     <ActivityLog pageSize={10} />
                 </Box>

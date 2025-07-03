@@ -86,7 +86,6 @@ const CompanyListLayout = () => {
                 {showBanner && <OnboardingBanner onClose={handleBannerClose} />}
                 <Stack direction="row" alignItems="center" gap={1} mb={1}>
                     <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 0.2, fontSize: '1.3rem', color: 'text.primary' }}>Companies</Typography>
-                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
                 </Stack>
                 <ListToolbar actions={<CompanyListActions />} />
                 <ImageList />

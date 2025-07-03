@@ -38,7 +38,6 @@ import { ContactNote, DealNote } from '../types';
 import { NoteAttachments } from './NoteAttachments';
 import { NoteInputs } from './NoteInputs';
 import { getNoteSummaryAndSentiment, getAINextAction, AISummaryResult, AINextActionResult } from '../misc/aiService';
-import { AIChip } from '../misc/AIChip';
 
 export function SentimentIcon({ sentiment }: { sentiment?: string }) {
     if (!sentiment) return null;
@@ -166,21 +165,6 @@ export const Note = ({
             onMouseLeave={() => setHover(false)}
             pb={1}
         >
-            {/* AI Chips Row */}
-            <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                {ai.summary && !ai.error && (
-                    <AIChip label="AI: Summary" color="primary" explanation="AI-generated summary of this note." onFeedback={handleFeedback} loading={aiLoading} />
-                )}
-                {ai.sentiment && !ai.error && (
-                    <AIChip label={`AI: ${ai.sentiment.charAt(0).toUpperCase() + ai.sentiment.slice(1)}`} color={ai.sentiment === 'positive' ? 'success' : ai.sentiment === 'negative' ? 'error' : 'warning'} explanation="AI-analyzed sentiment of this note." onFeedback={handleFeedback} loading={aiLoading} />
-                )}
-                {ai.nextAction && !ai.error && (
-                    <AIChip label={ai.nextAction} color="info" explanation="AI suggests the next best action based on note content." onFeedback={handleFeedback} loading={aiLoading} />
-                )}
-                {(aiError || ai.error) && (
-                    <AIChip label={String(aiError || ai.error || 'AI error')} color="warning" explanation="AI service is currently unavailable." />
-                )}
-            </Stack>
             <Stack direction="row" spacing={1} alignItems="center" width="100%">
                 {resource === 'contactNote' ? (
                     <Avatar width={20} height={20} />

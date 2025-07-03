@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, Box, Stack, Typography, Button, Chip } from '@mui/material';
+import { Card, Box, Stack, Typography, Button } from '@mui/material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { AddTask } from '../tasks/AddTask';
 import {
@@ -77,14 +77,12 @@ export const TasksList = () => {
                         size="small"
                         sx={{ ml: 'auto', borderRadius: 2, fontWeight: 600, textTransform: 'none' }}
                         onClick={handleAISuggest}
-                        startIcon={<span role="img" aria-label="AI">🤖</span>}
                     >
                         Let AI suggest next task
                     </Button>
                 </Box>
                 {aiTask && (
                     <Box mb={1}>
-                        <Chip label="AI: Suggested Task" color="info" icon={<span>🤖</span>} sx={{ mr: 1 }} />
                         <Typography variant="body2" display="inline">{aiTask.text}</Typography>
                     </Box>
                 )}
@@ -94,22 +92,19 @@ export const TasksList = () => {
                         <TasksListFilter
                             title="Overdue"
                             filter={taskFilters.overdue}
-                            aiHighlight={true}
                         />
-                        <TasksListFilter title="Today" filter={taskFilters.today} aiHighlight={true} />
+                        <TasksListFilter title="Today" filter={taskFilters.today} />
                         <TasksListFilter
                             title="Tomorrow"
                             filter={taskFilters.tomorrow}
-                            aiHighlight={true}
                         />
                         {isBeforeFriday && (
                             <TasksListFilter
                                 title="This week"
                                 filter={taskFilters.thisWeek}
-                                aiHighlight={true}
                             />
                         )}
-                        <TasksListFilter title="Later" filter={taskFilters.later} aiHighlight={true} />
+                        <TasksListFilter title="Later" filter={taskFilters.later} />
                     </Stack>
                 </Box>
             </Stack>
