@@ -147,7 +147,6 @@ const ContactListLayout = () => {
                 {showBanner && <OnboardingBanner onClose={handleBannerClose} />}
                 <Stack direction="row" alignItems="center" gap={0.5} mb={0.5}>
                     <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 0.2, fontSize: '1.3rem', color: 'text.primary' }}>Contacts</Typography>
-                    <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" sx={{ fontWeight: 700, letterSpacing: 1 }} />
                 </Stack>
                 <Stack direction="row" alignItems="center" gap={1} mb={1}>
                     <ToggleButtonGroup

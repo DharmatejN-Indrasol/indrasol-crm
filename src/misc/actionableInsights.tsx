@@ -1,9 +1,8 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Stack, Tooltip, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Box, Stack, Tooltip } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningIcon from '@mui/icons-material/Warning';
 import InsightsIcon from '@mui/icons-material/Insights';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 
 export function getActionableInsights({ contacts = [], deals = [], tasks = [] }: { contacts?: any[]; deals?: any[]; tasks?: any[] }) {
@@ -36,7 +35,6 @@ export function ActionableInsightsWidget({ insights, onInsightClick }: { insight
   return (
     <Box>
       <Stack direction="row" alignItems="center" gap={0.5} p={1}>
-        <Chip icon={<SmartToyIcon fontSize="small" />} label="AI" color="primary" size="small" aria-label="AI feature" sx={{ fontWeight: 700, letterSpacing: 1, '&:focus-visible': { outline: '2px solid #2563eb', outlineOffset: 2 } }} />
         <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563eb' }}>Actionable Insights</Typography>
       </Stack>
       <Stack direction="column" spacing={2} p={1}>

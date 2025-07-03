@@ -10,7 +10,6 @@ import { Note, SentimentIcon } from './Note';
 import { NoteCreate } from './NoteCreate';
 import { useState, useEffect } from 'react';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { AIChip } from '../misc/AIChip';
 
 export const NotesIterator = ({
     showStatus,
@@ -91,13 +90,6 @@ export const NotesIterator = ({
     const handleFeedback = (feedback: 'up' | 'down') => { /* TODO: send feedback to analytics */ };
     return (
         <Box mt={2}>
-            {/* AI Chips Row for Notes List */}
-            <Stack direction="row" alignItems="center" gap={1} mb={2}>
-                <AIChip label={`AI: ${ai.summaryCount} notes summarized`} color="primary" explanation="AI summarizes the number of notes with generated summaries." onFeedback={handleFeedback} loading={aiLoading} />
-                <AIChip label={`AI: Overall sentiment: ${ai.overallSentiment.charAt(0).toUpperCase() + ai.overallSentiment.slice(1)}`} color={ai.overallSentiment === 'positive' ? 'success' : ai.overallSentiment === 'negative' ? 'error' : 'warning'} explanation="AI analyzes the overall sentiment of all notes." onFeedback={handleFeedback} loading={aiLoading} />
-                {ai.nextAction && <AIChip label={ai.nextAction} color="info" explanation="AI suggests the next best action based on recent notes." onFeedback={handleFeedback} loading={aiLoading} />}
-                {(aiError || ai.error) && <AIChip label={String(aiError || ai.error || 'AI error')} color="warning" explanation="AI service is currently unavailable." />}
-            </Stack>
             <NoteCreate showStatus={showStatus} reference={reference} />
             <ToggleButtonGroup
                 value={sentimentFilter}

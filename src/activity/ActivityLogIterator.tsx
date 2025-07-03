@@ -14,7 +14,6 @@ import { ActivityLogContactCreated } from './ActivityLogContactCreated';
 import { ActivityLogContactNoteCreated } from './ActivityLogContactNoteCreated';
 import { ActivityLogDealCreated } from './ActivityLogDealCreated';
 import { ActivityLogDealNoteCreated } from './ActivityLogDealNoteCreated';
-import { AIChip } from '../misc/AIChip';
 
 const DEFAULT_ROW_HEIGHT = 88;
 
@@ -95,17 +94,8 @@ export function ActivityLogIterator({
 }
 
 function ActivityItem({ activity }: { activity: Activity }) {
-    // Mock AI sentiment and next best action
-    const aiSentiment = Number(activity.id) % 2 === 0 ? 'Positive' : 'Needs attention';
-    const aiAction = Number(activity.id) % 3 === 0 ? 'Call client' : null;
     return (
         <>
-            <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                <AIChip label={`AI: ${aiSentiment}`} color={aiSentiment === 'Positive' ? 'success' : 'warning'} explanation="AI-analyzed sentiment for this activity." onFeedback={() => {}} />
-                {aiAction && (
-                    <AIChip label={`AI: Next best action: ${aiAction}`} color="info" explanation="AI recommends this as your next best action!" onFeedback={() => {}} />
-                )}
-            </Stack>
             {activity.type === COMPANY_CREATED && <ActivityLogCompanyCreated activity={activity} />}
             {activity.type === CONTACT_CREATED && <ActivityLogContactCreated activity={activity} />}
             {activity.type === CONTACT_NOTE_CREATED && <ActivityLogContactNoteCreated activity={activity} />}
