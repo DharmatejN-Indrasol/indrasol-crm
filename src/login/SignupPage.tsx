@@ -64,11 +64,6 @@ export const SignupPage = () => {
         return <LoginSkeleton />;
     }
 
-    // For the moment, we only allow one user to sign up. Other users must be created by the administrator.
-    if (isInitialized) {
-        return <Navigate to="/login" />;
-    }
-
     const onSubmit: SubmitHandler<SignUpData> = async data => {
         mutate(data);
     };

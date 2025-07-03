@@ -11,6 +11,9 @@ import LeadKanbanBoard from './LeadKanbanBoard';
 import LeadListFilter from './LeadListFilter';
 import { Datagrid, TextField, EmailField, DateField, FunctionField, EditButton, DeleteButton } from 'react-admin';
 import { useNavigate } from 'react-router-dom';
+import { useDelete, useNotify, useRefresh } from 'react-admin';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const LeadListActions = ({ importBtnRef }: { importBtnRef: React.RefObject<HTMLButtonElement | null> }) => (
     <TopToolbar>
@@ -72,9 +75,9 @@ const LeadListLayout = () => {
                 {view === 'table' && (
                     <Card sx={{ p: 0.5, boxShadow: 2, borderRadius: 2, '&:hover': { boxShadow: 4, transform: 'translateY(-0.5px) scale(1.002)' }, transition: 'box-shadow 0.15s, transform 0.15s', animation: 'fadeInCard 0.2s cubic-bezier(0.4,0,0.2,1)' }}>
                         <Datagrid rowClick="edit" bulkActionButtons={false}>
-                            <TextField source="name" />
-                            <EmailField source="email" />
-                            <TextField source="phone" />
+                            <FunctionField label="Name" render={record => `${record.first_name || ''} ${record.last_name || ''}`.trim()} />
+                            <TextField source="email_address" label="Email" />
+                            <TextField source="direct_phone_number" label="Phone" />
                             <TextField source="status" />
                             <TextField source="owner_id" />
                             <DateField source="created_at" />
@@ -96,7 +99,7 @@ const LeadListLayout = () => {
 };
 
 export const LeadList = () => (
-    <ListBase perPage={25} sort={{ field: 'created_at', order: 'DESC' }} filters={<LeadListFilter />}>
+    <ListBase perPage={25} sort={{ field: 'created_at', order: 'DESC' }}>
         <LeadListLayout />
     </ListBase>
 ); 
