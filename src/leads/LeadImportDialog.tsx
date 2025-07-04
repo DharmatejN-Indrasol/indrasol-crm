@@ -247,6 +247,7 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
     const [pageBuffer, setPageBuffer] = useState<Map<number, any[]>>(new Map());
     const [mappingError, setMappingError] = useState<string | null>(null);
     const [papaParseDebug, setPapaParseDebug] = useState<any>(null); // For debugging raw PapaParse result
+    const [importMode, setImportMode] = useState<'csv' | 'zoominfo' | null>(null);
 
     const stepLabels = ['Upload', 'Mapping', 'Preview', 'Import'];
 
@@ -284,6 +285,23 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
             setMapping(autoMap);
         }
     }, [headers, mappingStep]);
+
+    // Add UI-side validation for previewRows:
+    useEffect(() => {
+        if (previewRows.length > 0) {
+            const invalidRows: number[] = [];
+            previewRows.forEach((row, idx) => {
+                const missingRequired = REQUIRED_FIELDS.some(field => !row[field] || row[field].toString().trim() === '');
+                const hasContact = CONTACT_FIELDS.some(field => row[field] && row[field].toString().trim() !== '');
+                if (missingRequired || !hasContact) {
+                    invalidRows.push(idx);
+                }
+            });
+            setMissingRequiredRows(invalidRows);
+        } else {
+            setMissingRequiredRows([]);
+        }
+    }, [previewRows, REQUIRED_FIELDS, CONTACT_FIELDS]);
 
     // Helper to map a CSV row to internal schema using mapping
     const mapRowWithMapping = (row: Record<string, any>) => {
@@ -503,6 +521,8 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
                 rowIdx++;
             },
             complete: () => {
+                // Debug: log rows to be imported
+                console.log('Importing rows:', allRows);
                 importLeads(allRows)
                     .then(() => {
                         setImportResult('Leads imported successfully');
@@ -531,11 +551,13 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
                         });
                         setTotalRows(t => t - importedIndices.length);
                     })
-                    .catch(() => {
+                    .catch((err) => {
                         setImportError('Error importing leads');
                         setImportErrorMsg('Error importing leads');
                         setImportSuccess(false);
                         notify('Error importing leads', { type: 'error' });
+                        // Debug: log error
+                        console.error('Error in importLeads:', err);
                     })
                     .finally(() => setImporting(false));
             },
@@ -642,136 +664,151 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
         }
     }, [activeStep, headers]);
 
+    // Step rendering logic
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>Import Leads</DialogTitle>
-            {/* Step summary bar */}
-            <Box sx={{ p: 2, mb: 2, background: '#f5f7fa', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="subtitle2">
-                    <strong>Step:</strong> {stepLabels[activeStep]}
-                </Typography>
-                {file && (
-                    <Typography variant="subtitle2" sx={{ ml: 2 }}>
-                        <strong>File:</strong> {file.name}
-                    </Typography>
-                )}
-                {activeStep >= 2 && (
-                    <Typography variant="subtitle2" sx={{ ml: 2 }}>
-                        <strong>Rows:</strong> {totalRows}
-                    </Typography>
-                )}
-            </Box>
             <DialogContent>
-                <Stepper activeStep={activeStep} orientation="horizontal">
-                    <Step key="upload">
-                        <StepLabel>Upload CSV File</StepLabel>
-                    </Step>
-                    <Step key="mapping">
-                        <StepLabel>Map Fields</StepLabel>
-                    </Step>
-                    <Step key="preview">
-                        <StepLabel>Preview & Import</StepLabel>
-                    </Step>
-                </Stepper>
-                {/* Step content below the Stepper */}
-                {activeStep === 0 && (
-                    <Box sx={{ mt: 2 }}>
-                        <UploadStep file={file} onFileChange={handleFileChange} onNext={() => setActiveStep(1)} fileInputRef={fileInputRef as React.RefObject<HTMLInputElement | null>} />
-                        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => {
-                            // Download a template CSV
-                            const csv = PREVIEW_FIELDS.join(',') + '\n';
-                            const blob = new Blob([csv], { type: 'text/csv' });
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'lead_import_template.csv';
-                            a.click();
-                            URL.revokeObjectURL(url);
-                        }}>Download Template CSV</Button>
+                {/* Step 0: Mode selection */}
+                {importMode === null && (
+                    <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <Typography variant="h6" sx={{ mb: 2 }}>Choose Import Method</Typography>
+                        <Box sx={{ display: 'flex', gap: 4 }}>
+                            <Button variant="contained" color="primary" size="large" onClick={() => { setImportMode('csv'); setActiveStep(0); }}>CSV Import</Button>
+                            <Button variant="contained" color="secondary" size="large" onClick={() => { setImportMode('zoominfo'); setActiveStep(0); }}>ZoomInfo Import</Button>
+                        </Box>
+                        <Button sx={{ mt: 4 }} onClick={onClose}>Cancel</Button>
                     </Box>
                 )}
-                {activeStep === 1 && (
-                    <Box sx={{ mt: 2, border: '2px dashed #1976d2', background: '#e3f2fd', p: 2 }}>
-                        <div style={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 8 }}>Mapping step here (debug)</div>
-                        <div style={{ marginBottom: 8 }}>Headers detected: <span style={{ color: '#d32f2f' }}>{headers && headers.length > 0 ? headers.join(', ') : 'None'}</span></div>
-                        {headers.length === 0 && (
+                {/* CSV Import Flow */}
+                {importMode === 'csv' && (
+                    <>
+                        <Stepper activeStep={activeStep} orientation="horizontal" sx={{ mb: 2 }}>
+                            <Step key="upload"><StepLabel>Upload CSV File</StepLabel></Step>
+                            <Step key="mapping"><StepLabel>Map Fields</StepLabel></Step>
+                            <Step key="preview"><StepLabel>Preview & Import</StepLabel></Step>
+                        </Stepper>
+                        {activeStep === 0 && (
+                            <Box sx={{ mt: 2 }}>
+                                <UploadStep file={file} onFileChange={handleFileChange} fileInputRef={fileInputRef as React.RefObject<HTMLInputElement | null>} />
+                                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                                    <Button variant="outlined" onClick={() => {
+                                        const csv = PREVIEW_FIELDS.join(',') + '\n';
+                                        const blob = new Blob([csv], { type: 'text/csv' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'lead_import_template.csv';
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    }}>Download Template CSV</Button>
+                                    {file && (
+                                        <Button variant="contained" onClick={() => setActiveStep(1)}>
+                                            Next
+                                        </Button>
+                                    )}
+                                </Box>
+                                <Button sx={{ mt: 2 }} onClick={() => { setImportMode(null); setActiveStep(0); }}>Back to Import Options</Button>
+                            </Box>
+                        )}
+                        {activeStep === 1 && (
+                            <Box sx={{ mt: 2, border: '2px dashed #1976d2', background: '#e3f2fd', p: 2 }}>
+                                <div style={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 8 }}>Mapping step here (debug)</div>
+                                <div style={{ marginBottom: 8 }}>Headers detected: <span style={{ color: '#d32f2f' }}>{headers && headers.length > 0 ? headers.join(', ') : 'None'}</span></div>
+                                {headers.length === 0 && (
+                                    <>
+                                        <Alert severity="error" sx={{ mb: 2 }}>
+                                            No headers found in the selected file. Please check your CSV for a header row as the first line.
+                                        </Alert>
+                                        <Box sx={{ fontSize: 12, color: '#333', background: '#fffde7', p: 1, border: '1px solid #fbc02d', mb: 2 }}>
+                                            <div>Raw PapaParse result:</div>
+                                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(papaParseDebug, null, 2)}</pre>
+                                        </Box>
+                                    </>
+                                )}
+                                {headers.length > 0 && (
+                                    <MappingStep mappingStep={mappingStep} headers={headers} mapping={mapping} setMapping={setMapping} onContinue={handleContinueToPreview} />
+                                )}
+                                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                                    <Button onClick={() => setActiveStep(0)}>Back</Button>
+                                    <Button variant="contained" onClick={handleContinueToPreview} disabled={!isMappingValid()}>
+                                        Continue to Preview
+                                    </Button>
+                                </Box>
+                                <Button sx={{ mt: 2 }} onClick={() => { setImportMode(null); setActiveStep(0); }}>Back to Import Options</Button>
+                            </Box>
+                        )}
+                        {activeStep === 2 && (
                             <>
-                                <Alert severity="error" sx={{ mb: 2 }}>
-                                    No headers found in the selected file. Please check your CSV for a header row as the first line.
-                                </Alert>
-                                {/* Debug: show raw PapaParse result */}
-                                <Box sx={{ fontSize: 12, color: '#333', background: '#fffde7', p: 1, border: '1px solid #fbc02d', mb: 2 }}>
-                                    <div>Raw PapaParse result:</div>
-                                    <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(papaParseDebug, null, 2)}</pre>
+                                <PreviewStep
+                                    importErrorMsg={importErrorMsg}
+                                    importSuccess={importSuccess}
+                                    showPreview={showPreview}
+                                    isPageLoading={isPageLoading}
+                                    previewRowsToShow={previewRowsToShow}
+                                    pagedRows={pagedRows}
+                                    selectedRows={selectedRows}
+                                    page={page}
+                                    rowsPerPage={rowsPerPage}
+                                    pageCount={pageCount}
+                                    allFields={allFields}
+                                    handleShowOnlySelected={handleShowOnlySelected}
+                                    showOnlySelected={showOnlySelected}
+                                    getCurrentPageIndices={getCurrentPageIndices}
+                                    handleSelectAllPage={handleSelectAllPage}
+                                    handleSelectRow={handleSelectRow}
+                                    handleCellChange={handleCellChange}
+                                    REQUIRED_FIELDS={REQUIRED_FIELDS}
+                                    CONTACT_FIELDS={CONTACT_FIELDS}
+                                    setPage={setPage}
+                                    setRowsPerPage={setRowsPerPage}
+                                    importAccess={importAccess}
+                                    openConfirm={openConfirm}
+                                    importing={importing}
+                                    missingRequiredRows={missingRequiredRows}
+                                    handleImportAll={handleImportAll}
+                                    handleImportPage={handleImportPage}
+                                    handleImportSelected={handleImportSelected}
+                                    confirmOpen={confirmOpen}
+                                    closeConfirm={closeConfirm}
+                                    confirmType={confirmType}
+                                    totalRows={totalRows}
+                                    handleConfirmImport={handleConfirmImport}
+                                    importResult={importResult}
+                                    importError={importError}
+                                    setActiveStep={setActiveStep}
+                                    onClearAllSelections={() => setSelectedRows(new Set())}
+                                />
+                                <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                    <Button onClick={() => setActiveStep(1)} disabled={importing}>Back</Button>
+                                    <Button variant="contained" color="primary" onClick={handleReset} disabled={importing}>
+                                        Reset
+                                    </Button>
+                                    <Button onClick={onClose} disabled={importing}>Close</Button>
                                 </Box>
                             </>
                         )}
-                        {headers.length > 0 && (
-                            <MappingStep mappingStep={mappingStep} headers={headers} mapping={mapping} setMapping={setMapping} onContinue={handleContinueToPreview} />
-                        )}
-                        {mappingError && <Alert severity="error" sx={{ mt: 2 }}>{mappingError}</Alert>}
-                        <Button variant="contained" onClick={handleContinueToPreview} disabled={!isMappingValid()} sx={{ mt: 2 }}>
-                            Continue to Preview
-                        </Button>
+                        {/* Confirmation Dialog for Import Actions */}
+                        <Dialog open={confirmOpen} onClose={closeConfirm}>
+                            <DialogTitle>Confirm Import</DialogTitle>
+                            <DialogContent>
+                                <Typography>Are you sure you want to import {confirmType === 'all' ? 'all rows' : confirmType === 'page' ? 'this page' : 'selected rows'}?</Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={closeConfirm}>Cancel</Button>
+                                <Button variant="contained" color="primary" onClick={handleConfirmImport}>Confirm</Button>
+                            </DialogActions>
+                        </Dialog>
+                    </>
+                )}
+                {/* ZoomInfo Import Flow */}
+                {importMode === 'zoominfo' && (
+                    <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <Typography variant="h6" sx={{ mb: 2 }}>ZoomInfo Import (Coming Soon)</Typography>
+                        <Button sx={{ mt: 4 }} onClick={() => setImportMode(null)}>Back to Import Options</Button>
                     </Box>
                 )}
-                {activeStep === 2 && (
-                    <PreviewStep
-                        importErrorMsg={importErrorMsg}
-                        importSuccess={importSuccess}
-                        showPreview={showPreview}
-                        isPageLoading={isPageLoading}
-                        previewRowsToShow={previewRowsToShow}
-                        pagedRows={pagedRows}
-                        selectedRows={selectedRows}
-                        page={page}
-                        rowsPerPage={rowsPerPage}
-                        pageCount={pageCount}
-                        allFields={allFields}
-                        handleShowOnlySelected={handleShowOnlySelected}
-                        showOnlySelected={showOnlySelected}
-                        getCurrentPageIndices={getCurrentPageIndices}
-                        handleSelectAllPage={handleSelectAllPage}
-                        handleSelectRow={handleSelectRow}
-                        handleCellChange={handleCellChange}
-                        REQUIRED_FIELDS={REQUIRED_FIELDS}
-                        CONTACT_FIELDS={CONTACT_FIELDS}
-                        setPage={setPage}
-                        setRowsPerPage={setRowsPerPage}
-                        importAccess={importAccess}
-                        openConfirm={openConfirm}
-                        importing={importing}
-                        missingRequiredRows={missingRequiredRows}
-                        handleImportAll={handleImportAll}
-                        handleImportPage={handleImportPage}
-                        handleImportSelected={handleImportSelected}
-                        confirmOpen={confirmOpen}
-                        closeConfirm={closeConfirm}
-                        confirmType={confirmType}
-                        totalRows={totalRows}
-                        handleConfirmImport={handleConfirmImport}
-                        importResult={importResult}
-                        importError={importError}
-                        setActiveStep={setActiveStep}
-                        ClearAllSelectionsButton={selectedRows.size > 0 ? (
-                            <Button sx={{ mb: 1 }} variant="outlined" color="warning" onClick={() => setSelectedRows(new Set())}>
-                                Clear All Selections
-                            </Button>
-                        ) : null}
-                    />
-                )}
-                <Box sx={{ mt: 4 }}>
-                    <Button variant="contained" color="primary" onClick={handleReset} sx={{ mr: 2 }}>
-                        Reset
-                    </Button>
-                    <Button variant="contained" color="secondary" onClick={handleZoomInfoImport}>
-                        Import from ZoomInfo API
-                    </Button>
-                </Box>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} disabled={importing}>Close</Button>
-            </DialogActions>
         </Dialog>
     );
 };

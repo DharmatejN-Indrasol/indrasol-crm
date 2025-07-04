@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ListBase, useListContext, Pagination, ListToolbar, TopToolbar, ExportButton, CreateButton, BulkActionsToolbar, BulkDeleteButton, BulkExportButton, SortButton } from 'react-admin';
-import { Stack, Card, Typography, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
+import { Stack, Card, Typography, Chip, CircularProgress, Alert, Tooltip, Divider } from '@mui/material';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -14,11 +14,12 @@ import { useNavigate } from 'react-router-dom';
 import { useDelete, useNotify, useRefresh } from 'react-admin';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { format } from 'date-fns';
 
-const LeadListActions = ({ importBtnRef }: { importBtnRef: React.RefObject<HTMLButtonElement | null> }) => (
+const LeadListActions = () => (
     <TopToolbar>
-        <SortButton fields={['name', 'email', 'created_at']} />
-        <LeadImportButton importBtnRef={importBtnRef} />
+        <SortButton fields={['first_name', 'last_name', 'created_at']} />
+        <LeadImportButton />
         <ExportButton />
         <CreateButton variant="contained" label="New Lead" sx={{ marginLeft: 2 }} />
     </TopToolbar>
@@ -28,7 +29,6 @@ const LeadListLayout = () => {
     const { data: rawData, isLoading, error, filterValues } = useListContext();
     const data = rawData || [];
     const [view, setView] = useState<'table' | 'kanban'>('table');
-    const importBtnRef = useRef(null);
     const hasFilters = filterValues && Object.keys(filterValues).length > 0;
     const navigate = useNavigate();
 
@@ -64,7 +64,7 @@ const LeadListLayout = () => {
                             <Tooltip title="Kanban View"><ViewKanbanIcon /></Tooltip>
                         </ToggleButton>
                     </ToggleButtonGroup>
-                    {view === 'table' && <ListToolbar actions={<LeadListActions importBtnRef={importBtnRef} />} />}
+                    {view === 'table' && <ListToolbar actions={<LeadListActions />} />}
                 </Stack>
                 {view === 'table' && (
                     <BulkActionsToolbar>
@@ -73,20 +73,46 @@ const LeadListLayout = () => {
                     </BulkActionsToolbar>
                 )}
                 {view === 'table' && (
-                    <Card sx={{ p: 0.5, boxShadow: 2, borderRadius: 2, '&:hover': { boxShadow: 4, transform: 'translateY(-0.5px) scale(1.002)' }, transition: 'box-shadow 0.15s, transform 0.15s', animation: 'fadeInCard 0.2s cubic-bezier(0.4,0,0.2,1)' }}>
-                        <Datagrid rowClick="edit" bulkActionButtons={false}>
+                    <Card sx={{ p: 0.5, boxShadow: 2, borderRadius: 3, '&:hover': { boxShadow: 4, transform: 'translateY(-0.5px) scale(1.002)' }, transition: 'box-shadow 0.15s, transform 0.15s', animation: 'fadeInCard 0.2s cubic-bezier(0.4,0,0.2,1)', overflow: 'visible' }}>
+                        <Datagrid
+                            rowClick="edit"
+                            bulkActionButtons={false}
+                            sx={{
+                                '& .RaDatagrid-headerCell': {
+                                    fontWeight: 700,
+                                    fontSize: '1rem',
+                                    background: '#fafbfc',
+                                    borderBottom: '2px solid #eee',
+                                    paddingY: 2,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 0.5,
+                                },
+                                '& .date-col': {
+                                    textAlign: 'center',
+                                    minWidth: 120,
+                                    color: '#7a7a7a',
+                                    fontSize: '0.97rem',
+                                },
+                            }}
+                        >
                             <FunctionField label="Name" render={record => `${record.first_name || ''} ${record.last_name || ''}`.trim()} />
                             <TextField source="email_address" label="Email" />
                             <TextField source="direct_phone_number" label="Phone" />
                             <TextField source="status" />
-                            <TextField source="owner_id" />
-                            <DateField source="created_at" />
-                            <DateField source="updated_at" />
+                            <TextField source="owner_id" label="Owner" />
+                            <FunctionField label="Created at"
+                                cellClassName="date-col"
+                                render={record => record.created_at ? format(new Date(record.created_at), 'dd MMM yyyy') : ''}
+                            />
+                            <FunctionField label="Updated at"
+                                cellClassName="date-col"
+                                render={record => record.updated_at ? format(new Date(record.updated_at), 'dd MMM yyyy') : ''}
+                            />
                             <FunctionField label="Actions" render={record => (
-                                <>
-                                    <EditButton record={record} />
-                                    <DeleteButton record={record} />
-                                </>
+                                <Stack direction="row" spacing={1}>
+                                    <EditButton record={record} variant="outlined" color="primary" sx={{ minWidth: 80, borderRadius: 2, fontWeight: 600 }} />
+                                    <DeleteButton record={record} variant="outlined" color="error" sx={{ minWidth: 80, borderRadius: 2, fontWeight: 600 }} />
+                                </Stack>
                             )} />
                         </Datagrid>
                     </Card>
