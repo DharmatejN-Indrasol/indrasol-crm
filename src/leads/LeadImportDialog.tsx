@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, LinearProgress, Typography, Box, Table, TableHead, TableBody, TableRow, TableCell, Alert, Stepper, Step, StepLabel, StepContent, TextField, Checkbox, Tooltip, Dialog as MuiDialog, DialogActions as MuiDialogActions, DialogContent as MuiDialogContent, DialogTitle as MuiDialogTitle
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, LinearProgress, Typography, Box, Table, TableHead, TableBody, TableRow, TableCell, Alert, Stepper, Step, StepLabel, StepContent, TextField, Checkbox, Tooltip, Dialog as MuiDialog, DialogActions as MuiDialogActions, DialogContent as MuiDialogContent, DialogTitle as MuiDialogTitle, Autocomplete, Stack, Paper
 } from '@mui/material';
 import { CheckCircle, Warning, ListAlt } from '@mui/icons-material';
 import Papa from 'papaparse';
@@ -213,6 +213,39 @@ async function fetchLeadsFromZoomInfoAPI(): Promise<{ leads: LeadImportSchema[],
     return { leads, summary };
 }
 
+// Add ZoomInfo filter dialog
+interface ZoomInfoFilterDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onApply: (filters: Record<string, string>) => void;
+    initialFilters: Record<string, string>;
+}
+const ZoomInfoFilterDialog = ({ open, onClose, onApply, initialFilters }: ZoomInfoFilterDialogProps) => {
+    const [jobTitle, setJobTitle] = useState(initialFilters?.jobTitle || '');
+    const [state, setState] = useState(initialFilters?.state || '');
+    const [industry, setIndustry] = useState(initialFilters?.industry || '');
+    const [managementLevel, setManagementLevel] = useState(initialFilters?.managementLevel || '');
+    const [emailDomain, setEmailDomain] = useState(initialFilters?.emailDomain || '');
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Filter ZoomInfo Leads</DialogTitle>
+            <DialogContent>
+                <Stack spacing={2} sx={{ mt: 1, minWidth: 320 }}>
+                    <TextField label="Job Title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} />
+                    <TextField label="State" value={state} onChange={e => setState(e.target.value)} />
+                    <TextField label="Industry" value={industry} onChange={e => setIndustry(e.target.value)} />
+                    <TextField label="Management Level" value={managementLevel} onChange={e => setManagementLevel(e.target.value)} />
+                    <TextField label="Email Domain" value={emailDomain} onChange={e => setEmailDomain(e.target.value)} />
+                    <Stack direction="row" spacing={2}>
+                        <Button variant="contained" onClick={() => onApply({ jobTitle, state, industry, managementLevel, emailDomain })}><span>Apply Filters & Import</span></Button>
+                        <Button variant="outlined" onClick={onClose}><span>Cancel</span></Button>
+                    </Stack>
+                </Stack>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolean; onClose: () => void; importAccess?: boolean }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const notify = useNotify();
@@ -248,6 +281,11 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
     const [mappingError, setMappingError] = useState<string | null>(null);
     const [papaParseDebug, setPapaParseDebug] = useState<any>(null); // For debugging raw PapaParse result
     const [importMode, setImportMode] = useState<'csv' | 'zoominfo' | null>(null);
+    const [zoomInfoDialogOpen, setZoomInfoDialogOpen] = useState(false);
+    const [zoomInfoFilters, setZoomInfoFilters] = useState<Record<string, string>>({});
+    const [zoomInfoPreview, setZoomInfoPreview] = useState<any[]>([]);
+    const [zoomInfoLoading, setZoomInfoLoading] = useState(false);
+    const [zoomInfoError, setZoomInfoError] = useState<string | null>(null);
 
     const stepLabels = ['Upload', 'Mapping', 'Preview', 'Import'];
 
@@ -586,48 +624,28 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
     // Show spinner if page is not loaded
     const isPageLoading = isParsing || !pageBuffer.has(page);
 
-    // Restore handleZoomInfoImport
-    const handleZoomInfoImport = async () => {
-        setImporting(true);
+    // Update handler for ZoomInfo import with filters to call backend function
+    const handleZoomInfoImportWithFilters = async (filters: Record<string, string>) => {
+        setZoomInfoDialogOpen(false);
+        setZoomInfoLoading(true);
+        setZoomInfoError(null);
         try {
-            const { leads, summary } = await fetchLeadsFromZoomInfoAPI();
-            // Deduplication and upsert logic
-            let imported = 0, updated = 0, skipped = summary.skipped, failed = 0;
-            for (const lead of leads) {
-                try {
-                    // Check for existing by zoominfo_contact_id or email_address
-                    const existing = await dataProvider.getList('leads', {
-                        filter: {
-                            ...(lead.zoominfo_contact_id ? { zoominfo_contact_id: lead.zoominfo_contact_id } : {}),
-                            ...(lead.email_address ? { email_address: lead.email_address } : {}),
-                        },
-                        pagination: { page: 1, perPage: 1 },
-                        sort: { field: 'id', order: 'ASC' },
-                    });
-                    if (existing.data.length > 0) {
-                        // Update existing
-                        await dataProvider.update('leads', {
-                            id: existing.data[0].id,
-                            data: { ...existing.data[0], ...lead },
-                            previousData: existing.data[0],
-                        });
-                        updated++;
-                    } else {
-                        await dataProvider.create('leads', { data: lead });
-                        imported++;
-                    }
-                } catch (err) {
-                    failed++;
-                    summary.errors.push(`Failed to import/update lead: ${lead.first_name} ${lead.last_name}`);
-                }
-            }
-            setImportResult({ ...summary, imported, updated, failed });
-            localStorage.setItem('zoominfo_last_import', new Date().toISOString());
-            notify('Leads imported from ZoomInfo API successfully', { type: 'success' });
+            const token = localStorage.getItem('sb-access-token');
+            const response = await fetch('/functions/v1/import-leads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify(filters),
+            });
+            if (!response.ok) throw new Error('Failed to fetch from backend import-leads function');
+            const data = await response.json();
+            setZoomInfoPreview(data.leads || []);
         } catch (err) {
-            notify('Error importing from ZoomInfo API', { type: 'error' });
+            setZoomInfoError('Error fetching from backend import-leads function');
         } finally {
-            setImporting(false);
+            setZoomInfoLoading(false);
         }
     };
 
@@ -690,7 +708,30 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
                         </Stepper>
                         {activeStep === 0 && (
                             <Box sx={{ mt: 2 }}>
-                                <UploadStep file={file} onFileChange={handleFileChange} fileInputRef={fileInputRef as React.RefObject<HTMLInputElement | null>} />
+                                <UploadStep file={file} onFileChange={e => {
+                                    if (e instanceof File) {
+                                        setFile(e);
+                                        setShowPreview(false);
+                                        setImportResult(null);
+                                        setImportError(null);
+                                        setHeaders([]);
+                                        setMissingRequiredRows([]);
+                                        setMapping({});
+                                        Papa.parse(e, {
+                                            header: true,
+                                            preview: 1,
+                                            skipEmptyLines: true,
+                                            complete: (results) => {
+                                                setPapaParseDebug(results);
+                                                setHeaders(results.meta.fields || []);
+                                                setMappingStep(true);
+                                                setActiveStep(1);
+                                            },
+                                        });
+                                    } else {
+                                        handleFileChange(e);
+                                    }
+                                }} fileInputRef={fileInputRef as React.RefObject<HTMLInputElement | null>} />
                                 <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                                     <Button variant="outlined" onClick={() => {
                                         const csv = PREVIEW_FIELDS.join(',') + '\n';
@@ -778,6 +819,7 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
                                     importError={importError}
                                     setActiveStep={setActiveStep}
                                     onClearAllSelections={() => setSelectedRows(new Set())}
+                                    file={file}
                                 />
                                 <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                     <Button onClick={() => setActiveStep(1)} disabled={importing}>Back</Button>
@@ -804,8 +846,54 @@ const LeadImportDialog = ({ open, onClose, importAccess = true }: { open: boolea
                 {/* ZoomInfo Import Flow */}
                 {importMode === 'zoominfo' && (
                     <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 2 }}>ZoomInfo Import (Coming Soon)</Typography>
+                        <Typography variant="h6" sx={{ mb: 2 }}>ZoomInfo Import</Typography>
+                        <Button variant="outlined" onClick={() => setZoomInfoDialogOpen(true)} sx={{ mb: 2 }}>Set Filters & Preview</Button>
+                        {zoomInfoLoading && <Typography>Loading from ZoomInfo...</Typography>}
+                        {zoomInfoError && <Alert severity="error">{String(zoomInfoError)}</Alert>}
+                        {zoomInfoPreview.length > 0 && (
+                            <Box sx={{ width: '100%', mt: 2 }}>
+                                <Typography variant="subtitle1">Preview ({zoomInfoPreview.length} leads):</Typography>
+                                <Paper sx={{ maxHeight: 400, overflow: 'auto', mt: 1 }}>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                {Object.keys(zoomInfoPreview[0]).map((col) => (
+                                                    <TableCell key={col}>{col.replace(/_/g, ' ')}</TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {zoomInfoPreview.map((row, idx) => (
+                                                <TableRow key={idx}>
+                                                    {Object.values(row).map((val, i) => (
+                                                        <TableCell key={i}>{val}</TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Paper>
+                                <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={async () => {
+                                    setImporting(true);
+                                    try {
+                                        await importLeads(zoomInfoPreview);
+                                        setImportResult('Leads imported from ZoomInfo successfully');
+                                        setImportSuccess(true);
+                                        setImportErrorMsg(null);
+                                        notify('Leads imported from ZoomInfo successfully', { type: 'success' });
+                                    } catch (err) {
+                                        setImportError('Error importing leads from ZoomInfo');
+                                        setImportErrorMsg('Error importing leads from ZoomInfo');
+                                        setImportSuccess(false);
+                                        notify('Error importing leads from ZoomInfo', { type: 'error' });
+                                    } finally {
+                                        setImporting(false);
+                                    }
+                                }}>Import All</Button>
+                            </Box>
+                        )}
                         <Button sx={{ mt: 4 }} onClick={() => setImportMode(null)}>Back to Import Options</Button>
+                        <ZoomInfoFilterDialog open={zoomInfoDialogOpen} onClose={() => setZoomInfoDialogOpen(false)} onApply={handleZoomInfoImportWithFilters} initialFilters={zoomInfoFilters} />
                     </Box>
                 )}
             </DialogContent>

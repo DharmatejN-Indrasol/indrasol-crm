@@ -11,7 +11,6 @@ export type ContactImportSchema = {
     salutation?: string;
     suffix?: string;
     job_title?: string;
-    management_level?: string;
     job_start_date?: string;
     job_function?: string;
     department?: string;
@@ -185,11 +184,9 @@ export function useContactImport() {
                             salutation: contact.salutation,
                             suffix: contact.suffix,
                             job_title: contact.job_title,
-                            management_level: contact.management_level,
                             job_start_date: contact.job_start_date
                                 ? new Date(contact.job_start_date).toISOString()
                                 : undefined,
-                            job_function: contact.job_function,
                             department: contact.department,
                             company_division_name: contact.company_division_name,
                             email_jsonb,

@@ -311,7 +311,7 @@ export const UnifiedImportDialog: React.FC<UnifiedImportDialogProps> = ({ open, 
                       {ENTITY_FIELDS[resource].map(field => (
                         <TableCell key={field}>
                           {row[mapping[field]]}
-                          {REQUIRED_FIELDS[resource].includes(field) && (!row[mapping[field]] || row[mapping[field]].toString().trim() === '') && (
+                          {Array.isArray(REQUIRED_FIELDS[resource]) && REQUIRED_FIELDS[resource].includes(field) && (!row[mapping[field]] || row[mapping[field]].toString().trim() === '') && (
                             <Chip label="Required" color="error" size="small" sx={{ ml: 1 }} />
                           )}
                         </TableCell>

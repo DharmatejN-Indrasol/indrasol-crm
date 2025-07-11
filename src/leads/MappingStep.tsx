@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Typography, Tooltip } from '@mui/material';
+import { Box, Button, Typography, Tooltip, Alert } from '@mui/material';
 import { PREVIEW_FIELDS, REQUIRED_FIELDS } from './useLeadImport';
 
 const statusChoices = [
@@ -42,13 +42,17 @@ const MappingStep: React.FC<MappingStepProps> = ({ mappingStep, headers, mapping
     }
   }, [headers, mappingStep, setMapping]);
 
+  const missingRequired = REQUIRED_FIELDS.filter(field => !mapping[field]);
+  const allMapped = missingRequired.length === 0;
+
   return (
     <Box sx={{ mt: 2 }}>
-      {mappingStep && headers.length > 0 && (
+      {headers.length > 0 && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>Map CSV columns to internal fields:</Typography>
           {PREVIEW_FIELDS.map(field => {
             const isRequired = REQUIRED_FIELDS.includes(field);
+            const isMissing = isRequired && !mapping[field];
             return (
               <Box key={field} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography sx={{ minWidth: 180 }}>
@@ -58,13 +62,16 @@ const MappingStep: React.FC<MappingStepProps> = ({ mappingStep, headers, mapping
                 <select
                   value={mapping[field] || ''}
                   onChange={e => setMapping(m => ({ ...m, [field]: e.target.value }))}
-                  style={{ minWidth: 200, borderColor: isRequired && !mapping[field] ? 'red' : undefined }}
+                  style={{ minWidth: 200, borderColor: isMissing ? 'red' : isRequired ? '#1976d2' : undefined, background: isMissing ? '#fff3f3' : undefined }}
                 >
                   <option value=''>-- None --</option>
                   {headers.map(h => (
                     <option key={h} value={h}>{h}</option>
                   ))}
                 </select>
+                {isMissing && (
+                  <span style={{ color: 'red', marginLeft: 8, fontSize: 12 }}>Required</span>
+                )}
                 {/* Show status options for reference if mapping status */}
                 {field === 'status' && (
                   <Tooltip title="Valid status values: New, Contacted, Qualified, Disqualified, Converted">
@@ -76,6 +83,16 @@ const MappingStep: React.FC<MappingStepProps> = ({ mappingStep, headers, mapping
               </Box>
             );
           })}
+          <Box sx={{ mt: 2 }}>
+            {!allMapped && (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Please map all required fields before continuing. Missing: {missingRequired.map(f => f.replace(/_/g, ' ')).join(', ')}
+              </Alert>
+            )}
+            <Button variant="contained" color="primary" onClick={onContinue} disabled={!allMapped}>
+              Continue
+            </Button>
+          </Box>
         </Box>
       )}
     </Box>

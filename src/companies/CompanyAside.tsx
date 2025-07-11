@@ -171,8 +171,7 @@ const AddressInfo = ({ record }: { record: Company }) => {
     if (
         !record.address &&
         !record.city &&
-        !record.zipcode &&
-        !record.stateAbbr
+        !record.zipcode
     ) {
         return null;
     }
@@ -184,7 +183,6 @@ const AddressInfo = ({ record }: { record: Company }) => {
             <TextField source="address" color="textSecondary" />
             <TextField source="city" color="textSecondary" />
             <TextField source="zipcode" color="textSecondary" />
-            <TextField source="stateAbbr" color="textSecondary" />
             <TextField source="country" color="textSecondary" />
         </Stack>
     );

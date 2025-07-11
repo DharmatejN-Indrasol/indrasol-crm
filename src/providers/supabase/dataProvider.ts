@@ -291,7 +291,6 @@ export const dataProvider = withLifecycleCallbacks(
                     'website',
                     'zipcode',
                     'city',
-                    'stateAbbr',
                 ])(params);
             },
             beforeCreate: async params => {

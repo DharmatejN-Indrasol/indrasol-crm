@@ -50,7 +50,7 @@ function hasMissingRequired(row: Record<string, any>, REQUIRED_FIELDS: string[],
     return missingBasic || !hasContact;
 }
 
-const PreviewStep: React.FC<PreviewStepProps> = ({
+const PreviewStep: React.FC<PreviewStepProps & { file?: File | null }> = ({
   importErrorMsg,
   importSuccess,
   showPreview,
@@ -87,9 +87,19 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
   importResult,
   importError,
   setActiveStep,
-  onClearAllSelections
+  onClearAllSelections,
+  file
 }) => (
   <Box sx={{ mt: 2 }}>
+    {/* File details summary */}
+    {file && (
+      <Card elevation={1} sx={{ p: 2, mb: 2, background: '#f1f8e9' }}>
+        <Typography variant="body2"><b>File:</b> {file.name}</Typography>
+        <Typography variant="body2"><b>Size:</b> {(file.size / 1024).toFixed(2)} KB</Typography>
+        <Typography variant="body2"><b>Type:</b> {file.type || 'N/A'}</Typography>
+        <Typography variant="body2"><b>Last Modified:</b> {file.lastModified ? new Date(file.lastModified).toLocaleString() : 'N/A'}</Typography>
+      </Card>
+    )}
     {/* Prominent error/success messages */}
     {importErrorMsg && (
       <Alert severity="error" sx={{ mb: 2, fontWeight: 'bold', fontSize: 16 }} icon={<Warning />}>
@@ -106,6 +116,8 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, justifyContent: 'space-between' }}>
         <Typography variant="body2">
           Showing {previewRowsToShow.length} of {pagedRows.length} rows on this page. Selected: {Array.from(selectedRows).filter(idx => idx >= page * rowsPerPage && idx < (page + 1) * rowsPerPage).length}
+          <br />
+          <b>Total rows:</b> {totalRows} | <b>Valid rows:</b> {pagedRows.length - missingRequiredRows.length} | <b>Invalid rows:</b> {missingRequiredRows.length}
         </Typography>
         <Tooltip title="Show only the rows you have selected for import or editing.">
           <Button onClick={handleShowOnlySelected} size="small" variant={showOnlySelected ? 'contained' : 'outlined'} color="secondary" startIcon={<ListAlt />}>

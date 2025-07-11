@@ -19,7 +19,7 @@ import { usePapaParse } from '../misc/usePapaParse';
 import { DealImportSchema, useDealImport } from './useDealImport';
 import { MouseEvent, useEffect, useState } from 'react';
 // TODO: Replace with actual sample CSV for deals
-const SAMPLE_URL = '';
+const SAMPLE_URL = '/deals_sample.csv';
 
 type DealImportModalProps = {
     open: boolean;
@@ -113,13 +113,18 @@ export function DealImportDialog({
                                 <Alert
                                     severity="info"
                                     action={
-                                        <Button
-                                            component={Link}
-                                            label="Download CSV sample"
-                                            color="info"
-                                            to={SAMPLE_URL}
-                                            download={'crm_deals_sample.csv'}
-                                        />
+                                        <a
+                                            href={SAMPLE_URL}
+                                            download="crm_deals_sample.csv"
+                                            style={{ textDecoration: 'none' }}
+                                        >
+                                            <Button
+                                                label="Download CSV sample"
+                                                color="info"
+                                                variant="contained"
+                                                component="span"
+                                            />
+                                        </a>
                                     }
                                 >
                                     Here is a sample CSV file you can use as a template

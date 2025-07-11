@@ -72,12 +72,6 @@ export const Task = ({
             <ListItem
                 secondaryAction={
                     <>
-                        {aiHighlight && (
-                            <AIChip label="AI: Most urgent" color="error" explanation="AI predicts this task is most urgent." onFeedback={() => {}} sx={{ mr: 1 }} />
-                        )}
-                        {task.aiSuggested && (
-                            <AIChip label="AI: Suggested" color="info" explanation="AI suggested this task for you!" onFeedback={() => {}} sx={{ mr: 1 }} />
-                        )}
                         <IconButton
                             edge="end"
                             aria-label="task actions"

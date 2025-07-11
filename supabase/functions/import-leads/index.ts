@@ -1,15 +1,17 @@
 // Permissions: Requires a valid Supabase JWT in the Authorization header. Only authenticated users can access.
-import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+// @ts-ignore: Deno global types are available in the Edge Functions runtime
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import supabaseAdmin from '../shared/supabaseAdmin.ts';
 import { corsHeaders, createErrorResponse } from '../shared/utils.ts';
 
-// Test ZoomInfo credentials (replace with real env vars in production)
-export const ZOOMINFO_CLIENT_ID = Deno.env.get('ZOOMINFO_CLIENT_ID') ?? 'test-client-id';
-export const ZOOMINFO_CLIENT_SECRET = Deno.env.get('ZOOMINFO_CLIENT_SECRET') ?? 'test-client-secret';
-
-export const ZOOMINFO_AUTH_URL = Deno.env.get('ZOOMINFO_AUTH_URL') ?? 'https://api.zoominfo.com/authenticate';
-export const ZOOMINFO_LEADS_URL = Deno.env.get('ZOOMINFO_LEADS_URL') ?? 'https://api.zoominfo.com/leads/search'; // This might need adjustment based on actual ZoomInfo API
+// @ts-ignore
+const ZOOMINFO_CLIENT_ID = Deno.env.get('ZOOMINFO_CLIENT_ID') ?? 'test-client-id';
+// @ts-ignore
+const ZOOMINFO_CLIENT_SECRET = Deno.env.get('ZOOMINFO_CLIENT_SECRET') ?? 'test-client-secret';
+// @ts-ignore
+const ZOOMINFO_AUTH_URL = Deno.env.get('ZOOMINFO_AUTH_URL') ?? 'https://api.zoominfo.com/authenticate';
+// @ts-ignore
+const ZOOMINFO_LEADS_URL = Deno.env.get('ZOOMINFO_LEADS_URL') ?? 'https://api.zoominfo.com/leads/search'; // This might need adjustment based on actual ZoomInfo API
 
 async function getZoomInfoToken() {
     const res = await fetch(ZOOMINFO_AUTH_URL, {
@@ -25,8 +27,27 @@ async function getZoomInfoToken() {
     return data.accessToken;
 }
 
+function mapFrontendFiltersToZoomInfo(filters: Record<string, string>) {
+    // Adjust these keys to match the ZoomInfo API exactly
+    const mapping: Record<string, string> = {
+        jobTitle: 'jobTitle', // or 'job_title' if ZoomInfo expects snake_case
+        state: 'state',       // or 'locationState' if required
+        industry: 'industry',
+        managementLevel: 'managementLevel',
+        emailDomain: 'emailDomain',
+    };
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(filters)) {
+        if (value && mapping[key]) {
+            result[mapping[key]] = value;
+        }
+    }
+    return result;
+}
+
 async function fetchZoomInfoLeads(token: string, filters: any) {
-    const params = new URLSearchParams(filters);
+    const mappedFilters = mapFrontendFiltersToZoomInfo(filters);
+    const params = new URLSearchParams(mappedFilters);
     const url = `${ZOOMINFO_LEADS_URL}?${params.toString()}`;
     const res = await fetch(url, {
         method: 'GET',
@@ -107,8 +128,11 @@ export async function handler(req: Request) {
     }
     // JWT authentication
     const authHeader = req.headers.get('Authorization');
+    // @ts-ignore
     const localClient = createClient(
+        // @ts-ignore
         Deno.env.get('SUPABASE_URL') ?? '',
+        // @ts-ignore
         Deno.env.get('SUPABASE_ANON_KEY') ?? '',
         { global: { headers: { Authorization: authHeader } } }
     );
@@ -137,4 +161,5 @@ export async function handler(req: Request) {
     }
 }
 
+// @ts-ignore
 Deno.serve(handler); 
