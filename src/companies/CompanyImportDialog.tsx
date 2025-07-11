@@ -19,7 +19,7 @@ import { usePapaParse } from '../misc/usePapaParse';
 import { CompanyImportSchema, useCompanyImport } from './useCompanyImport';
 import { MouseEvent, useEffect, useState } from 'react';
 // TODO: Replace with actual sample CSV for companies
-const SAMPLE_URL = '';
+const SAMPLE_URL = '/companies_sample.csv';
 
 type CompanyImportModalProps = {
     open: boolean;
@@ -37,6 +37,7 @@ export function CompanyImportDialog({
         processBatch,
     });
     const [file, setFile] = useState<File | null>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
     useEffect(() => {
         if (importer.state === 'complete') {
             refresh();
@@ -57,6 +58,9 @@ export function CompanyImportDialog({
         e.preventDefault();
         reset();
     };
+    const handleDragEnter = () => setIsDragOver(true);
+    const handleDragLeave = () => setIsDragOver(false);
+    const handleDrop = () => setIsDragOver(false);
     return (
         <Dialog open={open} maxWidth="md" fullWidth aria-labelledby="company-import-dialog-title">
             <DialogCloseButton onClose={handleClose} />
@@ -113,25 +117,44 @@ export function CompanyImportDialog({
                                 <Alert
                                     severity="info"
                                     action={
-                                        <Button
-                                            component={Link}
-                                            label="Download CSV sample"
-                                            color="info"
-                                            to={SAMPLE_URL}
-                                            download={'crm_companies_sample.csv'}
-                                        />
+                                        <a
+                                            href={SAMPLE_URL}
+                                            download="crm_companies_sample.csv"
+                                            style={{ textDecoration: 'none' }}
+                                        >
+                                            <Button
+                                                color="info"
+                                                variant="contained"
+                                                size="small"
+                                            >
+                                                Download CSV sample
+                                            </Button>
+                                        </a>
                                     }
                                 >
                                     Here is a sample CSV file you can use as a template
                                 </Alert>
-                                <FileInput
-                                    source="csv"
-                                    label="CSV File"
-                                    accept={{ 'text/csv': ['.csv'] }}
-                                    onChange={handleFileChange}
+                                <Box
+                                    onDragEnter={handleDragEnter}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    sx={{
+                                        border: isDragOver ? '2px solid #1976d2' : '2px dashed #ccc',
+                                        background: isDragOver ? '#e3f2fd' : 'transparent',
+                                        borderRadius: 2,
+                                        p: 2,
+                                        transition: 'all 0.2s',
+                                    }}
                                 >
-                                    <FileField source="src" title="title" />
-                                </FileInput>
+                                    <FileInput
+                                        source="csv"
+                                        label="CSV File"
+                                        accept={{ 'text/csv': ['.csv'] }}
+                                        onChange={handleFileChange}
+                                    >
+                                        <FileField source="src" title="title" />
+                                    </FileInput>
+                                </Box>
                             </>
                         )}
                     </Stack>

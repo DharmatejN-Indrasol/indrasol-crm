@@ -1,0 +1,3 @@
+name,sector,size,linkedin_url,website,phone_number,address,zipcode,city,context_links,country,description,revenue,tax_identifier,external_id,founded_year
+Acme Inc,Software,50,https://linkedin.com/company/acme,https://acme.com,1234567890,123 Main St,12345,Metropolis,"['https://acme.com/about']",USA,"A leading provider of widgets",1000000,AB123456,acme-001,2001
+Beta Inc,Finance,50,https://linkedin.com/company/beta,https://beta.com,987-654-3210,456 Elm St,54321,Gotham,USA,Finance solutions provider,500000,TX654321,"[\"link3.com\"]",EXT456,1999 

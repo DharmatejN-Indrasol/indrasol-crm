@@ -24,8 +24,6 @@ export const mapZoomInfoCsvRowToContact = (row: any): ContactImportSchema & Reco
   
       title: trimmedRow['Job Title'] || trimmedRow['title'] || '',
       company_name: trimmedRow['Company Name'] || trimmedRow['company_name'] || '',
-      department: trimmedRow['Department'] || trimmedRow['department'] || '',
-      job_function: trimmedRow['Job Function'] || trimmedRow['job_function'] || '',
       management_level: trimmedRow['Management Level'] || trimmedRow['management_level'] || '',
   
       email_work: trimmedRow['Email Address'] || trimmedRow['email_work'] || '',

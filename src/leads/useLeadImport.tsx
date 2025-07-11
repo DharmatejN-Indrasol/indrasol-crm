@@ -96,13 +96,53 @@ export function useLeadImport() {
     const today = new Date().toISOString();
     const user = useGetIdentity();
     const dataProvider = useDataProvider();
+    const allowedFields = [
+        'first_name', 'last_name', 'company_name', 'company_id', 'owner_id', 'status', 'source', 'notes', 'created_by',
+        'zoominfo_contact_id', 'middle_name', 'salutation', 'suffix', 'job_title', 'management_level', 'job_start_date',
+        'job_function', 'department', 'company_division_name', 'direct_phone_number', 'email_address', 'email_domain',
+        'mobile_phone', 'highest_level_of_education', 'contact_accuracy_score', 'contact_accuracy_grade',
+        'zoominfo_contact_profile_url', 'linkedin_contact_profile_url', 'notice_provided_date', 'person_street',
+        'person_city', 'person_state', 'person_zip_code', 'country', 'zoominfo_company_id', 'website', 'founded_year',
+        'company_hq_phone', 'fax', 'ticker', 'revenue', 'revenue_range', 'employees', 'employee_range', 'sic_codes',
+        'naics_codes', 'primary_industry', 'primary_sub_industry', 'all_industries', 'all_sub_industries',
+        'industry_hierarchical_category', 'secondary_industry_hierarchical_category', 'alexa_rank',
+        'zoominfo_company_profile_url', 'linkedin_company_profile_url', 'facebook_company_profile_url',
+        'twitter_company_profile_url', 'ownership_type', 'business_model', 'certified_active_company', 'certification_date',
+        'total_funding_amount', 'created_at', 'updated_at'
+    ];
+    const contactFields = [
+        'email_address', 'direct_phone_number', 'mobile_phone',
+        'email_work', 'email_home', 'email_other',
+        'phone_work', 'phone_home', 'phone_other',
+        'linkedin_contact_profile_url', 'linkedin_url',
+        'zoominfo_contact_profile_url', 'zoominfo_company_profile_url',
+        'facebook_company_profile_url', 'twitter_company_profile_url'
+    ];
     const processBatch = useCallback(
         async (batch: LeadImportSchema[]) => {
             await Promise.all(
                 batch.map(async (lead) => {
+                    // Validation: required fields
+                    if (!lead.first_name || !lead.last_name || !lead.company_name) {
+                        throw new Error('Missing required fields: first_name, last_name, or company_name');
+                    }
+                    // Validation: at least one contact field
+                    const hasContact = contactFields.some(field => lead[field as keyof LeadImportSchema] && String(lead[field as keyof LeadImportSchema]).trim() !== '');
+                    if (!hasContact) {
+                        throw new Error('At least one contact field (email, phone, LinkedIn, etc.) is required.');
+                    }
+                    // Only send allowed fields
+                    const leadData: Record<string, any> = Object.fromEntries(
+                        Object.entries(lead)
+                            .filter(([key, value]) => allowedFields.includes(key) && value !== undefined && value !== null && value !== '')
+                    );
+                    // Type validation for numbers
+                    ['founded_year', 'employees', 'alexa_rank', 'total_funding_amount'].forEach(field => {
+                        if (leadData[field]) leadData[field] = Number(leadData[field]);
+                    });
                     await dataProvider.create('leads', {
                         data: {
-                            ...lead,
+                            ...leadData,
                             owner_id: lead.owner_id || user?.identity?.id,
                             created_at: lead.created_at || today,
                             updated_at: lead.updated_at || today,

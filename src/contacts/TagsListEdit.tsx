@@ -29,15 +29,19 @@ export const TagsListEdit = () => {
     );
     const { data: tags, isPending: isPendingRecordTags } = useGetMany<Tag>(
         'tags',
-        { ids: record?.tags },
-        { enabled: record && record.tags && record.tags.length > 0 }
+        { ids: Array.isArray(record?.tags) ? record.tags : [] },
+        { enabled: record && Array.isArray(record.tags) && record.tags.length > 0 }
     );
     const [update] = useUpdate<Contact>();
 
     const unselectedTags =
         allTags &&
         record &&
+        Array.isArray(record.tags) &&
         allTags.filter(tag => !record.tags.includes(tag.id));
+
+    // Ensure unselectedTags is always an array
+    const safeUnselectedTags: Tag[] = Array.isArray(unselectedTags) ? unselectedTags : [];
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLDivElement>) => {
         setAnchorEl(event.currentTarget);
@@ -48,8 +52,8 @@ export const TagsListEdit = () => {
     };
 
     const handleTagAdd = (id: Identifier) => {
-        if (!record) {
-            throw new Error('No contact record found');
+        if (!record || !Array.isArray(record.tags)) {
+            throw new Error('No contact record or tags found');
         }
         const tags = [...record.tags, id];
         update('contacts', {
@@ -61,8 +65,8 @@ export const TagsListEdit = () => {
     };
 
     const handleTagDelete = async (id: Identifier) => {
-        if (!record) {
-            throw new Error('No contact record found');
+        if (!record || !Array.isArray(record.tags)) {
+            throw new Error('No contact record or tags found');
         }
         const tags = record.tags.filter(tagId => tagId !== id);
         await update('contacts', {
@@ -83,8 +87,8 @@ export const TagsListEdit = () => {
 
     const handleTagCreated = React.useCallback(
         async (tag: Tag) => {
-            if (!record) {
-                throw new Error('No contact record found');
+            if (!record || !Array.isArray(record.tags)) {
+                throw new Error('No contact record or tags found');
             }
 
             await update(
@@ -104,10 +108,16 @@ export const TagsListEdit = () => {
         [update, record]
     );
 
+    // Type guard to check if tags is Tag[]
+    function isTagArray(val: any): val is Tag[] {
+        return Array.isArray(val);
+    }
+    const tagsArray: Tag[] = isTagArray(tags) ? tags : [];
+
     if (isPendingRecordTags || isPendingAllTags) return null;
     return (
         <>
-            {tags?.map(tag => (
+            {tagsArray.map((tag: Tag) => (
                 <Box mt={1} mb={1} key={tag.id}>
                     <TagChip
                         tag={tag}
@@ -131,7 +141,7 @@ export const TagsListEdit = () => {
                 onClose={handleMenuClose}
                 anchorEl={anchorEl}
             >
-                {unselectedTags?.map(tag => (
+                {safeUnselectedTags.map(tag => (
                     <MenuItem key={tag.id} onClick={() => handleTagAdd(tag.id)}>
                         <Chip
                             size="small"

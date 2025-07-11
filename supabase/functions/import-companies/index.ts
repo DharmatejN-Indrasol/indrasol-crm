@@ -65,7 +65,6 @@ function mapZoomInfoCompanyToInternal(company) {
         address: company.address || '',
         zipcode: company.zipcode || '',
         city: company.city || '',
-        stateAbbr: company.stateAbbr || company.state || '',
         description: company.description || '',
         revenue: company.revenue || '',
         tax_identifier: company.tax_identifier || '',

@@ -1,0 +1,2 @@
+name,company_id,contact_ids,category,stage,description,amount,expected_closing_date,index
+Sample Deal,Google,"1,2,3",Sales,Prospecting,This is a sample deal,10000,2025-12-31,1 

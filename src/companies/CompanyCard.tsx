@@ -39,15 +39,16 @@ export const CompanyCard = (props: { record?: Company }) => {
     return (
         <Paper
             sx={{
-                height: 260,
+                height: 280,
                 minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 p: 0,
-                boxShadow: hovered ? 6 : 2,
+                boxShadow: hovered ? 8 : 2,
                 borderRadius: 3,
-                transition: 'box-shadow 0.2s, transform 0.15s',
+                border: hovered ? '2px solid #1976d2' : '1px solid #e0e7ef',
+                transition: 'box-shadow 0.2s, border 0.2s, transform 0.15s',
                 background: hovered ? 'linear-gradient(90deg, #f8fafc 0%, #e0e7ef 100%)' : 'background.paper',
                 position: 'relative',
                 cursor: 'pointer',
@@ -75,9 +76,17 @@ export const CompanyCard = (props: { record?: Company }) => {
                 >
                     <CompanyAvatar width={40} height={40} />
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', textAlign: 'center', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {record.name}
-                </Typography>
+                <Tooltip title={record.name} placement="top" arrow>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', textAlign: 'center', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {record.name}
+                    </Typography>
+                </Tooltip>
+                {/* Compact info row */}
+                <Stack direction="row" justifyContent="center" spacing={1} mt={0.5} mb={1}>
+                    {record.city && <Typography variant="caption" color="text.secondary">{record.city}</Typography>}
+                    {record.country && <Typography variant="caption" color="text.secondary">{record.country}</Typography>}
+                    {record.size && <Typography variant="caption" color="text.secondary">{record.size} emp.</Typography>}
+                </Stack>
                 {/* Sector as pill */}
                 <Stack direction="row" justifyContent="center" mt={0.5} mb={1}>
                     <SelectField

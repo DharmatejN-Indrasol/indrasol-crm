@@ -41,7 +41,8 @@ export async function getContactAvatar(
     record: Partial<Contact>
 ): Promise<string | null> {
     if (!record.email_jsonb || !record.email_jsonb.length) {
-        return null;
+        // Return a default avatar if no email is present
+        return '/public/img/empty.svg';
     }
 
     for (const { email } of record.email_jsonb) {
@@ -53,7 +54,7 @@ export async function getContactAvatar(
                 return gravatarUrl;
             }
         } catch (error) {
-            // Gravatar not found
+            // Gravatar not found or network error, continue to next method
         }
 
         // Step 2: Try to get favicon from email domain
@@ -66,5 +67,6 @@ export async function getContactAvatar(
         // TODO: Step 3: Try to get image from LinkedIn.
     }
 
-    return null;
+    // Fallback: Return a default avatar if all else fails
+    return '/public/img/empty.svg';
 }

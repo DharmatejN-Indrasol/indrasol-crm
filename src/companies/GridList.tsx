@@ -37,9 +37,9 @@ const LoadedGridList = React.memo(() => {
     const { data, error, isPending } = useListContext<Company>();
     if (isPending) {
         return (
-            <Box gap={2} display="grid" gridTemplateColumns="repeat(auto-fill, minmax(180px, 1fr))">
+            <Box gap={2} display="grid" gridTemplateColumns="repeat(auto-fill, minmax(240px, 1fr))">
                 {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} variant="rectangular" height={200} sx={{ borderRadius: 3, boxShadow: 2, transition: 'box-shadow 0.2s' }} />
+                    <Skeleton key={i} variant="rectangular" height={240} sx={{ borderRadius: 3, boxShadow: 2, transition: 'box-shadow 0.2s' }} />
                 ))}
             </Box>
         );
@@ -48,37 +48,13 @@ const LoadedGridList = React.memo(() => {
     if (!data || data.length === 0) {
         return <Typography p={2}>No companies found</Typography>;
     }
-
-    // Virtualized grid
-    const rowCount = Math.ceil(data.length / COLUMN_COUNT);
-    const width = COLUMN_COUNT * CARD_WIDTH + (COLUMN_COUNT - 1) * GRID_GAP;
-    const height = 600; // Adjust as needed
-
-    const Cell = ({ columnIndex, rowIndex, style }: any) => {
-        const index = rowIndex * COLUMN_COUNT + columnIndex;
-        if (index >= data.length) return null;
-        const record = data[index];
-        return (
-            <div style={{ ...style, left: style.left + GRID_GAP * columnIndex, top: style.top + GRID_GAP * rowIndex }}>
+    return (
+        <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: '1fr 1fr 1fr 1fr' }} gap={3}>
+            {data.map(record => (
                 <RecordContextProvider key={record.id} value={record}>
                     <MemoCompanyCard />
                 </RecordContextProvider>
-            </div>
-        );
-    };
-
-    return (
-        <Box width={width}>
-            <Grid
-                columnCount={COLUMN_COUNT}
-                columnWidth={CARD_WIDTH}
-                height={height}
-                rowCount={rowCount}
-                rowHeight={CARD_HEIGHT}
-                width={width}
-            >
-                {Cell}
-            </Grid>
+            ))}
         </Box>
     );
 });

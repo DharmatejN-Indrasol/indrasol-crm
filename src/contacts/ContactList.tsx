@@ -31,6 +31,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import { ContactListContent } from './ContactListContent';
+import { saveAs } from 'file-saver';
 
 const ONBOARDING_CONTACTS_BANNER_KEY = 'crm_onboarding_contacts_banner_dismissed';
 const GUIDED_TOUR_CONTACTS_IMPORT_KEY = 'crm_guided_tour_contacts_import_dismissed';
@@ -208,12 +209,15 @@ const exporter: Exporter<Contact> = async (records, fetchRelatedRecords) => {
         const exportedContact = {
             ...contact,
             company:
-                contact.company_id != null
+                contact.company_id != null && companies[contact.company_id]
                     ? companies[contact.company_id].name
                     : undefined,
-            sales: `${sales[contact.sales_id].first_name} ${sales[contact.sales_id].last_name
-                }`,
-            tags: contact.tags.map(tagId => tags[tagId].name).join(', '),
+            sales: contact.sales_id && sales[contact.sales_id]
+                ? `${sales[contact.sales_id].first_name} ${sales[contact.sales_id].last_name}`
+                : '',
+            tags: Array.isArray(contact.tags) && tags && contact.tags.length > 0
+                ? contact.tags.map(tagId => tags[tagId]?.name || '').filter(Boolean).join(', ')
+                : '',
             email_work: contact.email_jsonb?.find(
                 email => email.type === 'Work'
             )?.email,
@@ -242,6 +246,7 @@ const exporter: Exporter<Contact> = async (records, fetchRelatedRecords) => {
         return exportedContact;
     });
     return jsonExport(contacts, {}, (_err: any, csv: string) => {
-        downloadCSV(csv, 'contacts');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, 'contacts.csv');
     });
 };

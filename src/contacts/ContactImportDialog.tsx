@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Stack, Typography, Paper } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -18,7 +18,7 @@ import { DialogCloseButton } from '../misc/DialogCloseButton';
 import { usePapaParse } from '../misc/usePapaParse';
 import { ContactImportSchema, useContactImport } from './useContactImport';
 
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState, useCallback, useRef } from 'react';
 import * as sampleCsv from './contacts_export.csv?raw';
 import { mapZoomInfoCsvRowToContact } from './mapCsvRowToContact';
 
@@ -42,6 +42,8 @@ export function ContactImportDialog({
     });
 
     const [file, setFile] = useState<File | null>(null);
+    const [dragActive, setDragActive] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         if (importer.state === 'complete') {
@@ -49,8 +51,34 @@ export function ContactImportDialog({
         }
     }, [importer.state, refresh]);
 
-    const handleFileChange = (file: File | null) => {
-        setFile(file);
+    const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === 'dragenter' || e.type === 'dragover') {
+            setDragActive(true);
+        } else if (e.type === 'dragleave') {
+            setDragActive(false);
+        }
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile.type === 'text/csv' || droppedFile.name.endsWith('.csv')) {
+                setFile(droppedFile);
+            } else {
+                alert('Please upload a CSV file.');
+            }
+        }
+    }, []);
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFile(e.target.files[0]);
+        }
     };
 
     const startImport = () => {
@@ -167,14 +195,56 @@ export function ContactImportDialog({
                                     template
                                 </Alert>
 
-                                <FileInput
-                                    source="csv"
-                                    label="CSV File"
-                                    accept={{ 'text/csv': ['.csv'] }}
-                                    onChange={handleFileChange}
+                                {/* Drag-and-drop upload area (same as leads) */}
+                                <Paper
+                                    onDragEnter={handleDrag}
+                                    onDragOver={handleDrag}
+                                    onDragLeave={handleDrag}
+                                    onDrop={handleDrop}
+                                    sx={{
+                                        border: dragActive ? '2px solid #1976d2' : '2px dashed #90caf9',
+                                        background: '#f5fafd',
+                                        p: 3,
+                                        textAlign: 'center',
+                                        transition: 'border 0.2s, background 0.2s',
+                                        cursor: 'pointer',
+                                        borderRadius: 2,
+                                        mb: 2,
+                                    }}
+                                    onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <FileField source="src" title="title" />
-                                </FileInput>
+                                    <Typography variant="body1" sx={{ mb: 1 }}>
+                                        Drag and drop your CSV file here, or{' '}
+                                        <a
+                                            href="#"
+                                            style={{ color: '#1976d2', textDecoration: 'underline', cursor: 'pointer' }}
+                                            onClick={e => {
+                                                e.preventDefault();
+                                                fileInputRef.current?.click();
+                                            }}
+                                        >
+                                            click to select
+                                        </a>
+                                    </Typography>
+                                    <input
+                                        ref={fileInputRef}
+                                        id="contact-csv-input"
+                                        type="file"
+                                        accept=".csv,text/csv"
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileInputChange}
+                                    />
+                                    {file ? (
+                                        <Box sx={{ mt: 2, textAlign: 'left', display: 'inline-block', background: '#f1f8e9', p: 2, borderRadius: 2 }}>
+                                            <Typography variant="body2"><b>File:</b> {file.name}</Typography>
+                                            <Typography variant="body2"><b>Size:</b> {(file.size / 1024).toFixed(2)} KB</Typography>
+                                            <Typography variant="body2"><b>Type:</b> {file.type || 'N/A'}</Typography>
+                                            <Typography variant="body2"><b>Last Modified:</b> {file.lastModified ? new Date(file.lastModified).toLocaleString() : 'N/A'}</Typography>
+                                        </Box>
+                                    ) : (
+                                        <Typography variant="body2" sx={{ mt: 1, color: '#888' }}>No file selected</Typography>
+                                    )}
+                                </Paper>
                             </>
                         )}
                     </Stack>

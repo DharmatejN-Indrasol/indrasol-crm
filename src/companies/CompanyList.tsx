@@ -24,6 +24,8 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CloseIcon from '@mui/icons-material/Close';
+import type { Exporter } from 'react-admin';
+import { unparse as toCsv } from 'papaparse';
 
 const ONBOARDING_COMPANIES_BANNER_KEY = 'crm_onboarding_companies_banner_dismissed';
 
@@ -47,7 +49,7 @@ export const CompanyList = () => {
     const { identity } = useGetIdentity();
     if (!identity) return null;
     return (
-        <ListBase perPage={25} sort={{ field: 'name', order: 'ASC' }} filters={<CompanyListFilter />}>
+        <ListBase perPage={25} sort={{ field: 'name', order: 'ASC' }}>
             <CompanyListLayout />
         </ListBase>
     );
@@ -95,12 +97,26 @@ const CompanyListLayout = () => {
     );
 };
 
+const exporter: Exporter<any> = (records) => {
+    const data = records.map(({ id, ...record }) => record);
+    const csv = toCsv(data);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'companies_export.csv';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(url);
+};
+
 const CompanyListActions = () => {
     return (
         <TopToolbar>
             <SortButton fields={['name', 'created_at', 'nb_contacts']} />
             <CompanyImportButton />
-            <ExportButton />
+            <ExportButton exporter={exporter} />
             <CreateButton
                 variant="contained"
                 label="New Company"

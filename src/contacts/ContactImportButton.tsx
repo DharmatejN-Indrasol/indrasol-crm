@@ -8,6 +8,7 @@ import { fetchWithTimeout } from '../misc/fetchWithTimeout';
 import { Alert, Snackbar, Backdrop, CircularProgress, Dialog, DialogTitle, DialogContent, TextField, Stack, Autocomplete, Chip, Box, Typography } from '@mui/material';
 import { useContactImport } from './useContactImport';
 import { UnifiedImportDialog } from '../misc/UnifiedImportDialog';
+import React from 'react';
 
 const industries = ['Software', 'Finance', 'Healthcare', 'Manufacturing', 'Retail', 'Education', 'Other'];
 const managementLevels = ['C-Level', 'VP', 'Director', 'Manager', 'Staff', 'Other'];
@@ -15,9 +16,9 @@ const managementLevels = ['C-Level', 'VP', 'Director', 'Manager', 'Staff', 'Othe
 function getFriendlyErrorMessage(error: string | null): string | null {
     if (!error) return null;
     const lower = error.toLowerCase();
-    if (lower.includes('quota')) return 'Your ZoomInfo API quota has been exceeded. Please contact your administrator or ZoomInfo support.';
-    if (lower.includes('invalid credentials') || lower.includes('unauthorized')) return 'Invalid ZoomInfo API credentials. Please check your API key and secret.';
-    if (lower.includes('timeout')) return 'The request to ZoomInfo timed out. Please try again later.';
+    if (typeof lower === 'string' && lower.includes('quota')) return 'Your ZoomInfo API quota has been exceeded. Please contact your administrator or ZoomInfo support.';
+    if (typeof lower === 'string' && (lower.includes('invalid credentials') || lower.includes('unauthorized'))) return 'Invalid ZoomInfo API credentials. Please check your API key and secret.';
+    if (typeof lower === 'string' && lower.includes('timeout')) return 'The request to ZoomInfo timed out. Please try again later.';
     return error;
 }
 
@@ -86,7 +87,7 @@ function ZoomInfoContactFilterDialog({ open, onClose, onApply, initialFilters }:
     );
 }
 
-export const ContactImportButton = ({ importBtnRef }: { importBtnRef?: React.RefObject<HTMLButtonElement | null> }) => {
+export const ContactImportButton = React.forwardRef<HTMLButtonElement, { importBtnRef?: React.RefObject<HTMLButtonElement | null> }>((props, ref) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ imported: number; errors: number } | null>(null);
@@ -149,7 +150,7 @@ export const ContactImportButton = ({ importBtnRef }: { importBtnRef?: React.Ref
                 startIcon={<UploadIcon />}
                 label="Import"
                 onClick={() => setModalOpen(true)}
-                ref={importBtnRef}
+                ref={ref}
             />
             {isAdmin && (
                 <>
@@ -195,4 +196,4 @@ export const ContactImportButton = ({ importBtnRef }: { importBtnRef?: React.Ref
             </Backdrop>
         </>
     );
-};
+});
